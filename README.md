@@ -11,6 +11,16 @@ GISGPT/
 │   ├── css/style.css   — styles
 │   ├── js/app.js       — map/chat logic
 │   └── assets/         — images, Figma starter files
-└── docs/
-    └── PROTOTYPE.md    — prototype details and feature list
+├── notebooks/          — Jupyter notebooks for satellite imagery analysis (learning path)
+├── docs/
+│   ├── PROTOTYPE.md    — prototype details and feature list
+│   └── satellite-data.md — where to get free satellite imagery
+└── requirements.txt    — Python dependencies for the notebooks
+```
+
+## Getting started with satellite analysis
+
+```bash
+pip install -r requirements.txt
+jupyter notebook notebooks/01-intro-satellite-analysis.ipynb
 ```
