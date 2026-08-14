@@ -1,10 +1,20 @@
-GISGPT Prototype
-================
+# GISGPT Prototype
 
-Files
-- index.html — responsive functional web prototype
-- gisgpt-logo.png — loading/logo screen
-- GISGPT_Figma_Starter.svg — monochrome desktop + mobile starter frames for import into Figma
+## Files
+
+```
+prototype/
+├── index.html          — responsive functional web prototype (entry point)
+├── css/
+│   └── style.css       — all styles (extracted from index.html)
+├── js/
+│   └── app.js          — all map/chat logic (extracted from index.html)
+└── assets/
+    ├── gisgpt-logo.png              — loading/logo screen
+    └── GISGPT_Figma_Starter.svg     — monochrome desktop + mobile starter frames for import into Figma
+```
+
+## Prototype functions
 
 Prototype functions
 - GISGPT loading screen
