@@ -1,7 +1,11 @@
 const map = L.map('map',{zoomControl:false,attributionControl:true}).setView([13.0827,100.8851],13);
 const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'}).addTo(map);
 const street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});
-let currentLayer='satellite';
+const GISTDA_KEY=''; // ใส่ API key ของคุณ (สมัครฟรีที่ https://api-gateway.gistda.or.th) แล้วจะเลือกชั้นภาพ 2 เมตรได้
+const gistda = L.tileLayer('https://api-gateway.gistda.or.th/api/2.0/resources/tiles/gi-basemap_68/{z}/{x}/{y}.png?api_key='+GISTDA_KEY,{maxZoom:19,attribution:'© GISTDA'});
+const layerList=[{id:'satellite',label:'SATELLITE',tile:satellite},{id:'street',label:'STREET',tile:street}];
+if(GISTDA_KEY)layerList.push({id:'gistda',label:'GISTDA 2M',tile:gistda});
+let layerIdx=0;
 let roi=null, drawnItems=new L.FeatureGroup().addTo(map), analysisLayer=new L.FeatureGroup().addTo(map);
 const defaultCenter=[13.0827,100.8851], defaultZoom=13;
 
@@ -12,8 +16,10 @@ document.getElementById('zoomIn').onclick=()=>map.zoomIn();
 document.getElementById('zoomOut').onclick=()=>map.zoomOut();
 document.getElementById('reset').onclick=()=>map.setView(defaultCenter,defaultZoom);
 document.getElementById('layers').onclick=()=>{
- if(currentLayer==='satellite'){map.removeLayer(satellite);street.addTo(map);currentLayer='street';}
- else{map.removeLayer(street);satellite.addTo(map);currentLayer='satellite';}
+ layerIdx=(layerIdx+1)%layerList.length;
+ layerList.forEach(l=>map.removeLayer(l.tile));
+ layerList[layerIdx].tile.addTo(map);
+ document.getElementById('systemText').textContent='SYS: STABLE // '+layerList[layerIdx].label;
 };
 document.getElementById('locate').onclick=()=>map.locate({setView:true,maxZoom:16});
 map.on('locationfound',e=>addMessage('assistant',`Location found.<div class="assistant-card"><div class="metric"><span>LAT</span><span>${e.latlng.lat.toFixed(5)}</span></div><div class="metric"><span>LON</span><span>${e.latlng.lng.toFixed(5)}</span></div></div>`));

@@ -14,7 +14,8 @@ GISGPT/
 ├── notebooks/          — Jupyter notebooks for satellite imagery analysis (learning path)
 ├── docs/
 │   ├── PROTOTYPE.md    — prototype details and feature list
-│   └── satellite-data.md — where to get free satellite imagery
+│   ├── satellite-data.md — where to get free satellite imagery
+│   └── gistda-data.md  — GISTDA open data API guide (register key at api-gateway.gistda.or.th)
 └── requirements.txt    — Python dependencies for the notebooks
 ```
 
@@ -24,3 +25,11 @@ GISGPT/
 pip install -r requirements.txt
 jupyter notebook notebooks/01-intro-satellite-analysis.ipynb
 ```
+
+## GISTDA data (Thai satellite/GIS data)
+
+To use GISTDA's 2-meter satellite basemap and data APIs (rice, floods, PM2.5, ...):
+
+1. Register a free API key at https://api-gateway.gistda.or.th
+2. Put the key in `GISTDA_KEY` in `prototype/js/app.js` (adds a GISTDA 2M layer to the map)
+3. See `docs/gistda-data.md` and `notebooks/02-gistda-open-data.ipynb`
