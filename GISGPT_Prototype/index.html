@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GISGPT — Geographic Chatbot Prototype</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+<style>
+:root{--bg:#050505;--panel:#0c0c0e;--panel2:#111114;--line:#29292d;--text:#f5f5f5;--muted:#8d8d94;--white:#fff}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);overflow:hidden}
+button,input{font:inherit}.app{height:100%;position:relative;background:#000}.map{position:absolute;inset:0;z-index:1}.topbar{position:absolute;z-index:500;top:0;left:0;right:0;height:64px;background:rgba(5,5,5,.94);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:18px}
+.brand{display:flex;align-items:center;gap:9px;min-width:190px}.brand-dot{width:15px;height:15px;background:#fff}.brand b{font-size:15px;letter-spacing:1.6px}.sys{font-size:10px;color:#777;letter-spacing:1px}.search{height:38px;max-width:480px;flex:1;margin-left:auto;display:flex;align-items:center;background:#111114;border:1px solid #28282d;border-radius:6px;padding:0 11px;gap:8px}.search input{width:100%;background:transparent;border:0;outline:0;color:#eee;font-size:12px}.search input::placeholder{color:#666}.btn{border:1px solid #303036;background:#151518;color:#eee;border-radius:6px;height:36px;padding:0 14px;font-size:11px;letter-spacing:.7px;cursor:pointer}.btn:hover{background:#222227}.connect{white-space:nowrap}.map-tools{position:absolute;z-index:450;right:18px;top:92px;display:flex;flex-direction:column;gap:6px}.tool{width:38px;height:38px;background:rgba(10,10,12,.94);border:1px solid #2c2c31;color:#fff;border-radius:5px;cursor:pointer;font-size:16px}.tool.small{font-size:13px}.tool.active{background:#fff;color:#000}.chat-toggle{position:absolute;z-index:600;right:22px;bottom:24px;width:58px;height:58px;border-radius:50%;border:0;background:#fff;color:#000;box-shadow:0 6px 25px rgba(0,0,0,.45);font-size:22px;cursor:pointer}.chat-panel{position:absolute;z-index:550;left:0;top:64px;bottom:0;width:370px;background:rgba(8,8,10,.97);border-right:1px solid var(--line);display:flex;flex-direction:column;transform:translateX(-101%);transition:transform .22s ease}.chat-panel.open{transform:translateX(0)}.chat-head{padding:18px 18px 14px;border-bottom:1px solid var(--line)}.eyebrow{font-size:10px;letter-spacing:1.6px;font-weight:700}.sub{font-size:10px;color:#777;margin-top:5px}.messages{flex:1;overflow:auto;padding:18px}.msg{margin-bottom:16px}.msg .meta{font-size:9px;color:#777;letter-spacing:.9px;margin-bottom:6px}.bubble{font-size:12px;line-height:1.55;border:1px solid #28282d;background:#111114;border-radius:7px;padding:12px}.msg.user .bubble{background:#17171a}.assistant-card{border:1px solid #333339;background:#0e0e10;padding:11px;border-radius:7px;margin-top:8px}.metric{display:flex;justify-content:space-between;border-bottom:1px solid #27272b;padding:8px 0;font-size:11px}.metric:last-child{border-bottom:0}.metric span:last-child{font-weight:700}.composer{border-top:1px solid var(--line);padding:12px;display:flex;gap:8px}.composer textarea{flex:1;resize:none;height:52px;background:#101013;border:1px solid #29292e;border-radius:6px;color:#eee;padding:9px;font-size:11px;outline:0}.send{width:42px;height:52px}.select-badge{position:absolute;z-index:480;left:50%;top:86px;transform:translateX(-50%);background:#111114;border:1px solid #35353a;border-radius:5px;padding:9px 13px;font-size:10px;letter-spacing:.8px;display:none}.select-badge.show{display:block}.leaflet-control-attribution{font-size:8px}.leaflet-control-zoom{margin-top:0!important}.leaflet-control-zoom a{background:#0b0b0d!important;color:#fff!important;border-color:#303036!important}.selection-info{position:absolute;z-index:520;left:18px;bottom:22px;background:rgba(8,8,10,.94);border:1px solid #303036;border-radius:7px;padding:12px 14px;min-width:215px;display:none}.selection-info.show{display:block}.selection-title{font-size:9px;letter-spacing:1.2px;color:#aaa}.selection-size{font-size:18px;font-weight:700;margin:4px 0}.selection-actions{display:flex;gap:7px;margin-top:9px}.selection-actions .btn{height:31px;font-size:9px;padding:0 9px}.modal{position:absolute;inset:0;background:rgba(0,0,0,.58);z-index:1000;display:none;align-items:center;justify-content:center}.modal.show{display:flex}.modal-card{width:min(390px,calc(100vw - 30px));background:#0d0d10;border:1px solid #36363c;border-radius:8px;padding:18px}.modal-card h3{margin:0 0 6px;font-size:14px}.modal-card p{font-size:10px;color:#888;margin:0 0 16px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:9px;color:#888;margin-bottom:5px}.field input{width:100%;height:36px;background:#151518;border:1px solid #303036;border-radius:5px;color:#fff;padding:0 9px}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.loading{position:absolute;z-index:2000;inset:0;background:#fff;color:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;transition:opacity .45s ease}.loading img{width:190px;height:190px;object-fit:contain}.loading .loadbar{width:170px;height:2px;background:#ddd;overflow:hidden}.loading .loadbar i{display:block;height:100%;width:45%;background:#111;animation:load 1.15s infinite ease-in-out}@keyframes load{0%{transform:translateX(-100%)}100%{transform:translateX(390%)}}.loading.hide{opacity:0;pointer-events:none}.scenario-list{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.scenario{border:1px solid #34343a;background:#151518;color:#eee;border-radius:4px;padding:5px 7px;font-size:9px;cursor:pointer}.scenario:hover{background:#25252a}.legend{position:absolute;right:66px;bottom:20px;z-index:450;background:rgba(8,8,10,.92);border:1px solid #303036;border-radius:6px;padding:9px 11px;font-size:9px;display:none}.legend.show{display:block}.legend div{display:flex;align-items:center;gap:6px;margin:3px 0}.swatch{width:9px;height:9px;background:#fff;border:1px solid #000}.swatch.dash{background:transparent;border:1px dashed #fff}
+@media(max-width:800px){
+ .topbar{height:56px;padding:0 12px}.brand{min-width:0}.brand .sys{display:none}.brand b{font-size:12px}.brand-dot{width:12px;height:12px}.search{position:absolute;left:12px;right:12px;top:66px;max-width:none;height:40px;background:rgba(8,8,10,.93)}.connect{display:none}.map-tools{right:12px;top:122px}.tool{width:36px;height:36px}.chat-toggle{right:16px;bottom:17px}.chat-panel{top:auto;bottom:0;left:0;right:0;width:100%;height:min(72vh,610px);border-right:0;border-top:1px solid #303036;border-radius:16px 16px 0 0;transform:translateY(105%)}.chat-panel.open{transform:translateY(0)}.chat-head{padding-top:14px}.select-badge{top:116px}.selection-info{left:12px;bottom:16px;min-width:200px}.legend{right:12px;bottom:86px}.leaflet-bottom.leaflet-left{bottom:4px}.loading img{width:160px;height:160px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="map" class="map"></div>
+
+  <div class="loading" id="loading">
+    <img src="gisgpt-logo.png" alt="GISGPT">
+    <div class="loadbar"><i></i></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span><b>GISGPT</b><span class="sys">// M</span></div>
+    <div class="sys" id="systemText">SYS: STABLE // SATELLITE MODE</div>
+    <div class="search"><span>⌕</span><input id="searchInput" placeholder="Search place, coordinates, Plus Code..." autocomplete="off"></div>
+    <button class="btn connect" id="connectBtn">CONNECT STREAM</button>
+  </header>
+
+  <div class="select-badge" id="selectBadge">DRAW RECTANGLE — SET AREA SIZE AFTER SELECTION</div>
+
+  <div class="map-tools">
+    <button class="tool" id="zoomIn">+</button>
+    <button class="tool" id="zoomOut">−</button>
+    <button class="tool" id="layers" title="Satellite / Street">◫</button>
+    <button class="tool" id="locate" title="My location">⌖</button>
+    <button class="tool small" id="measure" title="Select area">▣</button>
+    <button class="tool small" id="reset" title="Reset view">↺</button>
+  </div>
+
+  <div class="selection-info" id="selectionInfo">
+    <div class="selection-title">SELECTED ROI</div>
+    <div class="selection-size" id="selectionSize">0.00 km²</div>
+    <div id="selectionDim" style="font-size:9px;color:#888">—</div>
+    <div class="selection-actions">
+      <button class="btn" id="editArea">SET SIZE</button>
+      <button class="btn" id="askArea">ASK GISGPT</button>
+    </div>
+  </div>
+
+  <div class="legend" id="legend">
+    <b style="font-size:9px;letter-spacing:1px">ANALYSIS OVERLAY</b>
+    <div><span class="swatch"></span> detected area</div>
+    <div><span class="swatch dash"></span> ROI boundary</div>
+  </div>
+
+  <button class="chat-toggle" id="chatToggle" aria-label="Open chat">▢</button>
+
+  <aside class="chat-panel" id="chatPanel">
+    <div class="chat-head">
+      <div class="eyebrow">TELEMETRY TERMINAL</div>
+      <div class="sub" id="session">Active session: gisgpt-demo_01</div>
+    </div>
+    <div class="messages" id="messages">
+      <div class="msg assistant">
+        <div class="meta">GISGPT // CORE-V4</div>
+        <div class="bubble">
+          GISGPT ready. Select an area on the map, then ask a geographic question.
+          <div class="scenario-list">
+            <button class="scenario" data-q="วิเคราะห์สิ่งปลูกสร้างในพื้นที่นี้">BUILDINGS</button>
+            <button class="scenario" data-q="วิเคราะห์พื้นที่สีเขียว">GREEN SPACE</button>
+            <button class="scenario" data-q="วิเคราะห์ถนนและเส้นทาง">ROADS</button>
+            <button class="scenario" data-q="วิเคราะห์แหล่งน้ำ">WATER</button>
+            <button class="scenario" data-q="วิเคราะห์การใช้ประโยชน์ที่ดิน">LAND USE</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="composer">
+      <textarea id="composer" placeholder="Prompt GISGPT (e.g. Identify buildings in area...)"></textarea>
+      <button class="btn send" id="send">↑</button>
+    </div>
+  </aside>
+
+  <div class="modal" id="areaModal">
+    <div class="modal-card">
+      <h3>DEFINE ROI SIZE</h3>
+      <p>กำหนดขนาดกรอบพื้นที่ที่เลือกได้เอง โดยให้จุดกึ่งกลางเดิมคงอยู่</p>
+      <div class="fields">
+        <div class="field"><label>WIDTH (km)</label><input id="widthInput" type="number" min=".05" step=".05" value="1"></div>
+        <div class="field"><label>HEIGHT (km)</label><input id="heightInput" type="number" min=".05" step=".05" value="1"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelModal">CANCEL</button>
+        <button class="btn" id="applyModal">APPLY</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<script>
+const map = L.map('map',{zoomControl:false,attributionControl:true}).setView([13.0827,100.8851],13);
+const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri'}).addTo(map);
+const street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});
+let currentLayer='satellite';
+let roi=null, drawnItems=new L.FeatureGroup().addTo(map), analysisLayer=new L.FeatureGroup().addTo(map);
+const defaultCenter=[13.0827,100.8851], defaultZoom=13;
+
+function hideLoading(){setTimeout(()=>document.getElementById('loading').classList.add('hide'),1250)}
+hideLoading();
+
+document.getElementById('zoomIn').onclick=()=>map.zoomIn();
+document.getElementById('zoomOut').onclick=()=>map.zoomOut();
+document.getElementById('reset').onclick=()=>map.setView(defaultCenter,defaultZoom);
+document.getElementById('layers').onclick=()=>{
+ if(currentLayer==='satellite'){map.removeLayer(satellite);street.addTo(map);currentLayer='street';}
+ else{map.removeLayer(street);satellite.addTo(map);currentLayer='satellite';}
+};
+document.getElementById('locate').onclick=()=>map.locate({setView:true,maxZoom:16});
+map.on('locationfound',e=>addMessage('assistant',`Location found.<div class="assistant-card"><div class="metric"><span>LAT</span><span>${e.latlng.lat.toFixed(5)}</span></div><div class="metric"><span>LON</span><span>${e.latlng.lng.toFixed(5)}</span></div></div>`));
+map.on('locationerror',()=>addMessage('assistant','Location permission is unavailable in this browser.'));
+
+const drawControl=new L.Control.Draw({draw:{polygon:false,polyline:false,circle:false,circlemarker:false,marker:false,rectangle:{shapeOptions:{color:'#fff',weight:2,dashArray:'7 5',fillOpacity:.08}}},edit:{featureGroup:drawnItems}});
+document.getElementById('measure').onclick=()=>{document.getElementById('selectBadge').classList.add('show');new L.Draw.Rectangle(map,drawControl.options.draw.rectangle).enable();};
+map.on(L.Draw.Event.CREATED,e=>{
+ drawnItems.clearLayers(); analysisLayer.clearLayers(); roi=e.layer; drawnItems.addLayer(roi);
+ document.getElementById('selectBadge').classList.remove('show');
+ updateSelection();
+ openAreaModal();
+});
+function hav(a,b){const R=6371;const dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lng-a.lng)*Math.PI/180;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function dimensions(bounds){const sw=bounds.getSouthWest(),ne=bounds.getNorthEast();const w=hav({lat:sw.lat,lng:sw.lng},{lat:sw.lat,lng:ne.lng});const h=hav({lat:sw.lat,lng:sw.lng},{lat:ne.lat,lng:sw.lng});return {w,h,area:w*h}}
+function updateSelection(){if(!roi)return;const d=dimensions(roi.getBounds());document.getElementById('selectionInfo').classList.add('show');document.getElementById('selectionSize').textContent=d.area.toFixed(2)+' km²';document.getElementById('selectionDim').textContent=`${d.w.toFixed(2)} km × ${d.h.toFixed(2)} km`;}
+function openAreaModal(){const d=dimensions(roi.getBounds());document.getElementById('widthInput').value=d.w.toFixed(2);document.getElementById('heightInput').value=d.h.toFixed(2);document.getElementById('areaModal').classList.add('show')}
+document.getElementById('editArea').onclick=openAreaModal;
+document.getElementById('cancelModal').onclick=()=>document.getElementById('areaModal').classList.remove('show');
+document.getElementById('applyModal').onclick=()=>{
+ if(!roi)return;
+ const w=+document.getElementById('widthInput').value,h=+document.getElementById('heightInput').value,c=roi.getBounds().getCenter();
+ const latDelta=(h/111.32)/2,lonDelta=(w/(111.32*Math.cos(c.lat*Math.PI/180)))/2;
+ roi.setBounds([[c.lat-latDelta,c.lng-lonDelta],[c.lat+latDelta,c.lng+lonDelta]]);
+ updateSelection();document.getElementById('areaModal').classList.remove('show');
+};
+document.getElementById('askArea').onclick=()=>{document.getElementById('chatPanel').classList.add('open');document.getElementById('composer').focus();};
+
+document.getElementById('chatToggle').onclick=()=>document.getElementById('chatPanel').classList.toggle('open');
+document.querySelectorAll('.scenario').forEach(b=>b.onclick=()=>{document.getElementById('composer').value=b.dataset.q;sendMessage()});
+document.getElementById('send').onclick=sendMessage;
+document.getElementById('composer').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}});
+
+function addMessage(type,text){const box=document.getElementById('messages'),m=document.createElement('div');m.className='msg '+type;m.innerHTML=`<div class="meta">${type==='user'?'USER_09':'GISGPT // CORE-V4'}</div><div class="bubble">${text}</div>`;box.appendChild(m);box.scrollTop=box.scrollHeight}
+function scenarioFor(q){q=q.toLowerCase();if(q.includes('green')||q.includes('สีเขียว'))return 'green';if(q.includes('road')||q.includes('ถนน')||q.includes('เส้นทาง'))return 'roads';if(q.includes('water')||q.includes('น้ำ'))return 'water';if(q.includes('land')||q.includes('ใช้ประโยชน์'))return 'land';return 'buildings'}
+function fakeAnalysis(kind){
+ analysisLayer.clearLayers();if(!roi)return;
+ const b=roi.getBounds(),sw=b.getSouthWest(),ne=b.getNorthEast(),latSpan=ne.lat-sw.lat,lonSpan=ne.lng-sw.lng;
+ const polys=[];let count=kind==='buildings'?18:kind==='roads'?4:kind==='water'?2:kind==='green'?5:6;
+ for(let i=0;i<count;i++){
+   const x=(i*37%100)/100,y=(i*61%100)/100,w=(kind==='buildings'?.07:.18),h=(kind==='buildings'?.045:.12);
+   const x2=Math.min(.95,x+w),y2=Math.min(.95,y+h);
+   polys.push([[sw.lat+y*latSpan,sw.lng+x*lonSpan],[sw.lat+y2*latSpan,sw.lng+x2*lonSpan]]);
+ }
+ polys.forEach(p=>{
+   L.rectangle(p,{color:'#fff',weight:1.5,dashArray:kind==='roads'?'2 5':'4 3',fillColor:'#fff',fillOpacity:.16,interactive:false}).addTo(analysisLayer)
+ });
+ document.getElementById('legend').classList.add('show');
+}
+function sendMessage(){
+ const el=document.getElementById('composer'),q=el.value.trim();if(!q)return;
+ addMessage('user',q);el.value='';
+ if(!roi){setTimeout(()=>addMessage('assistant','เลือกพื้นที่บนแผนที่ก่อนครับ แล้วผมจะผูกคำถามเข้ากับ ROI ที่เลือก'),250);return}
+ const kind=scenarioFor(q);setTimeout(()=>{
+   fakeAnalysis(kind);const d=dimensions(roi.getBounds());
+   const data={buildings:['BUILDINGS DETECTED','184','42,381 m²'],green:['GREEN SPACE','31.6%','0.76 km²'],roads:['ROAD NETWORK','12.4 km','18 segments'],water:['WATER FEATURES','2','0.18 km²'],land:['LAND USE CLASSES','5','classified']};
+   const x=data[kind];
+   addMessage('assistant',`Analysis complete. Highlight overlay updated on the map.<div class="assistant-card"><div class="metric"><span>ROI</span><span>${d.area.toFixed(2)} km²</span></div><div class="metric"><span>${x[0]}</span><span>${x[1]}</span></div><div class="metric"><span>MEASURE</span><span>${x[2]}</span></div></div>`);
+ },500);
+}
+
+document.getElementById('searchInput').addEventListener('keydown',async e=>{
+ if(e.key!=='Enter')return;const q=e.target.value.trim();if(!q)return;
+ document.getElementById('systemText').textContent='SYS: SEARCHING // GEOCODING';
+ try{
+   const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='+encodeURIComponent(q),{headers:{'Accept-Language':'en'}});
+   const a=await r.json();if(!a.length)throw new Error('not found');
+   map.flyTo([+a[0].lat,+a[0].lon],15,{duration:1.2});
+   addMessage('assistant',`Location found: <b>${a[0].display_name}</b><div class="assistant-card"><div class="metric"><span>LAT</span><span>${(+a[0].lat).toFixed(5)}</span></div><div class="metric"><span>LON</span><span>${(+a[0].lon).toFixed(5)}</span></div></div>`);
+ }catch(err){addMessage('assistant','ไม่พบพื้นที่จากคำค้นนี้ ลองชื่อสถานที่หรือพิกัดอีกครั้ง');}
+ document.getElementById('systemText').textContent='SYS: STABLE // SATELLITE MODE';
+});
+document.getElementById('connectBtn').onclick=function(){this.textContent=this.textContent==='CONNECT STREAM'?'STREAM CONNECTED':'CONNECT STREAM'};
+</script>
+</body>
+</html>
