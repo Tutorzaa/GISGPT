@@ -45,3 +45,29 @@
 - 📦 **รวม repo GitHub**: merge งานนี้เข้ากับ `github.com/Tutorzaa/GISGPT` (branch main) — รวมประวัติทั้ง 2 ฝั่ง (ของเดิม: platform/OpenLayers + prototype + learning notebooks)
 - 📝 อัปเดตเอกสาร: README ใหม่ (สถาปัตยกรรม agent + ผลทดสอบ + roadmap), satellite-data.md (API ล่าสุด: Copernicus STAC, NASA GIBS/POWER, NSDC), gistda-data.md (+NSDC/THEOS-2), PROTOTYPE.md (ชี้ระบบใหม่)
 - ผล: merge คอนฟลิกแค่ .gitignore + requirements.txt (รวมกันแล้ว)
+
+## 2026-08-23 (รอบ 4) — Phase A: ระบบ hotspot บุรีรัมย์ 🚜🔥
+
+### สำรวจข้อมูล (พบว่าฟรี/สาธารณะ)
+- **GISTDA ArcGIS REST services เปิดสาธารณะ** (ไม่ต้องคีย์!): `gistdaportal.gistda.or.th/data/rest/services`
+  - `FR_Fire/hotspot_daily` (Aqua/Terra) — fields: confident(0-100), satellite, datetime, lu_name, ตำบล/อำเภอ/จังหวัด
+  - `FR_Fire/hotspot_npp_daily` (NOAA-20 VIIRS) — confident(text), date/time, lu_name
+  - `FR_Fire/AirQuality_daily` — 70 สถานี: st_name, pm25, pm10, lat/lon, จังหวัด
+- ข้อมูล hotspot ทั้งหมดเป็นวันเดียว: **2023-04-06** (ฤดูเผา ก.พ.–เม.ย. พอดี) — 532 + 1001 จุดทั้งประเทศ
+- ขอบเขต 77 จังหวัด: `apisit/thailand.json` (GeoJSON, ชื่ออังกฤษ) → บุรีรัมย์ polygon 523 จุด
+- **สถานีฝุ่นใกล้บุรีรัมย์สุด: 47t โคราช (~90กม.)** — สถานีในอีสานน้อย (ประเด็นวิจัย Phase B)
+
+### สร้าง
+- `geo/hotspots.py` — ดึง GISTDA + FIRMS (ถ้ามีคีย์) → normalize → point-in-polygon → จัดอันดับ score (FRP/confidence) + cache 1 ชม.
+- `scripts/fetch_hotspots.py` — CLI: `--province บุรีรัมย์` / `--bbox` / `--days`
+- `templates/hotspots.html` — แผนที่ Leaflet: ขอบเขตจังหวัด + จุดสีตามความรุนแรง + popup + ตาราง Top 10 + legend
+- `main.py` — routes `/hotspots` + `/api/hotspots?province=`
+- agent: tool `fire_hotspots` + planner keywords (เผา/ไฟ/hotspot/จุดความร้อน)
+
+### ทดสอบผ่าน
+- fetch: 13 จุดในบุรีรัมย์ (Aqua 4, Terra 2, NOAA-20 VIIRS 7) — พื้นที่เกษตร 8, เขต สปก. 3, ป่าสงวน 1, ชุมชน 1 — อันดับ top: 97, 84, 73
+- API `/api/hotspots` ✅ | หน้า `/hotspots` HTTP 200 ✅ | agent "จุดไหนในบุรีรัมย์มีการเผา" ✅ (curl ไทยพังเพราะ cp1252 — browser/py client ปกติ)
+
+### หมายเหตุ
+- ข้อมูล GISTDA เป็นชุดตัวอย่าง (วันเดียว) — ใช้เป็น demo/validation; FIRMS (ถ้ามีคีย์) จะให้ข้อมูลสด
+- Phase B ต่อไป: ดึง AirQuality_daily + spatial join กับ hotspot 47t โคราช + correlation

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GISGPT — แผนที่จุดความร้อน (Hotspot)</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/static/css/style.css">
+  <style>
+    #map { height: calc(100vh - 60px); }
+    #app { max-width: 100%; }
+    .map-wrap { display: flex; height: calc(100vh - 60px); }
+    #map { flex: 1; }
+    #side { width: 360px; background: var(--panel); border-left: 1px solid var(--border); overflow-y: auto; padding: 14px; }
+    #side h3 { margin: 8px 0; color: var(--accent2); font-size: 15px; }
+    #side table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    #side td, #side th { padding: 4px 6px; border-bottom: 1px solid var(--border); text-align: left; }
+    #side .chip { font-size: 11px; }
+    .backlink { font-size: 12px; color: var(--accent); text-decoration: none; }
+    .legend { margin-top: 10px; }
+    .legend div { display: flex; align-items: center; gap: 6px; font-size: 12px; margin: 3px 0; }
+    .sw { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="logo">🌍 GISGPT <span style="font-size:12px;color:var(--muted)">— จุดความร้อน</span></div>
+      <div class="tagline">การเผาไหม้ (hotspot) + ขอบเขตจังหวัด</div>
+      <a class="backlink" href="/">← กลับแชท</a>
+    </header>
+    <div class="map-wrap">
+      <div id="map"></div>
+      <div id="side">
+        <h3>📋 สรุป</h3>
+        <div id="summary">กำลังโหลด...</div>
+        <h3>🔥 อันดับความรุนแรง (Top 10)</h3>
+        <table id="rank"><thead><tr><th>#</th><th>score</th><th>พิกัด (lat, lon)</th><th>วันที่</th><th>ดาวเทียม</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([15.0, 103.0], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18, attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    function color(score, max) {
+      const t = Math.min(1, score / (max || 1));
+      const r = 255, g = Math.round(255 * (1 - t)), b = 60;
+      return `rgb(${r},${g},${b})`;
+    }
+
+    fetch('/api/hotspots?province=บุรีรัมย์')
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { document.getElementById('summary').textContent = data.error; return; }
+        const s = data.summary;
+
+        // ขอบเขตจังหวัด
+        L.geoJSON(data.boundary, { style: { color: '#4f8cff', weight: 2, fillOpacity: 0.06 } }).addTo(map);
+
+        // จุด hotspot
+        const max = Math.max(1, ...data.hotspots.map(h => h.score));
+        data.hotspots.forEach(h => {
+          L.circleMarker([h.lat, h.lon], {
+            radius: 6, color: '#fff', weight: 1,
+            fillColor: color(h.score, max), fillOpacity: 0.85
+          }).addTo(map).bindPopup(
+            `<b>score ${h.score}</b><br>(${h.lat.toFixed(4)}, ${h.lon.toFixed(4)})<br>` +
+            `📅 ${h.datetime}<br>🛰️ ${h.satellite || '-'}<br>🏞️ ${h.lu_name || '-'}<br>` +
+            `📍 ${h.province || '-'} ${h.district || ''} ${h.subdistrict || ''}`
+          );
+        });
+
+        const luChips = Object.entries(s.by_lu).map(([k, v]) => `<span class="chip">${k}: ${v}</span>`).join(' ');
+        document.getElementById('summary').innerHTML = `
+          <p><b>${s.province}</b> — จุดทั้งหมด <b>${s.count}</b> จุด</p>
+          <p>ช่วงวันที่: ${s.date_range[0]} → ${s.date_range[1]}</p>
+          <p>แหล่งข้อมูล: ${JSON.stringify(s.by_source)}</p>
+          <p>ดาวเทียม: ${JSON.stringify(s.by_satellite)}</p>
+          <p>ประเภทที่ดิน: ${luChips || '-'}</p>`;
+
+        const tbody = document.querySelector('#rank tbody');
+        s.top.forEach((h, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${i + 1}</td><td><b>${h.score}</b></td>` +
+            `<td>${h.lat.toFixed(4)}, ${h.lon.toFixed(4)}</td>` +
+            `<td>${h.datetime}</td><td>${h.satellite || '-'}</td>`;
+          tbody.appendChild(tr);
+        });
+
+        // legend
+        const legend = L.control({ position: 'bottomleft' });
+        legend.onAdd = () => {
+          const div = L.DomUtil.create('div', 'legend');
+          div.style.background = 'rgba(23,30,46,0.9)'; div.style.padding = '8px 10px'; div.style.borderRadius = '8px'; div.style.color = '#e8ecf5';
+          div.innerHTML = '<b>ความรุนแรง (score)</b>' +
+            `<div><span class="sw" style="background:${color(max, max)}"></span> แรงสุด (${max})</div>` +
+            `<div><span class="sw" style="background:${color(max / 2, max)}"></span> ปานกลาง</div>` +
+            `<div><span class="sw" style="background:${color(1, max)}"></span> อ่อน</div>`;
+          return div;
+        };
+        legend.addTo(map);
+      })
+      .catch(e => document.getElementById('summary').textContent = '⚠️ ' + e.message);
+  </script>
+</body>
+</html>

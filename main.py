@@ -9,6 +9,7 @@ from flask import Flask, jsonify, render_template, request, send_from_directory,
 
 from agent import Agent
 from agent import memory as mem
+from geo import hotspots as hs
 from geo import io as geo_io
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -48,6 +49,20 @@ def chat():
     if not message:
         return jsonify(error="ข้อความว่างเปล่า"), 400
     return jsonify(agent.handle(session["sid"], message))
+
+
+@app.route("/hotspots")
+def hotspots_page():
+    return render_template("hotspots.html")
+
+
+@app.route("/api/hotspots")
+def api_hotspots():
+    province = request.args.get("province", "บุรีรัมย์")
+    data = hs.province_hotspots(province)
+    if "error" in data:
+        return jsonify(data), 404
+    return jsonify(data)
 
 
 @app.route("/outputs/<path:name>")

@@ -3,9 +3,11 @@
 แต่ละฟังก์ชัน: func(ctx, **args) -> dict {text, artifacts, data}
 ctx = หน่วยความจำของ session (ดู agent/memory.py)
 """
+import json
 import os
 import uuid
 
+from geo import hotspots as hotspots_mod
 from geo import io as geo_io
 from geo import pipeline
 from geo.indices import BASELINE_CLASSES
@@ -121,6 +123,29 @@ def t_help(ctx, **kw):
     return {"text": "\n".join(lines)}
 
 
+def t_fire_hotspots(ctx, province="บุรีรัมย์", **kw):
+    """จุดความร้อน (การเผาไหม้) ในจังหวัด + จัดอันดับ — ลิงก์ไปหน้าแผนที่"""
+    data = hotspots_mod.province_hotspots(province)
+    if "error" in data:
+        return {"text": data["error"]}
+    s = data["summary"]
+    lines = [
+        f"🔥 จุดความร้อนในจังหวัด **{s['province']}**: {s['count']} จุด",
+        f"ช่วงวันที่: {s['date_range'][0]} → {s['date_range'][1]}",
+        f"ดาวเทียม: {json.dumps(s['by_satellite'], ensure_ascii=False)}",
+        "", "อันดับ Top 5 (score = ความรุนแรง):",
+    ]
+    for t in s["top"][:5]:
+        lines.append(
+            f"  #{t['score']} ({t['lat']:.4f}, {t['lon']:.4f}) {t['datetime']} {t['satellite'] or ''}"
+        )
+    return {
+        "text": "\n".join(lines),
+        "artifacts": [{"type": "link", "url": "/hotspots", "caption": "เปิดแผนที่ hotspot"}],
+        "data": data,
+    }
+
+
 def register_tools(registry):
     registry.register(Tool("classify", "จำแนก land cover จากภาพดาวเทียม", [], t_classify, "analysis"))
     registry.register(Tool("index", "คำนวณดัชนีสเปกตรัม (which=ndvi/ndwi/ndbi)", ["which"], t_index, "analysis"))
@@ -128,4 +153,5 @@ def register_tools(registry):
     registry.register(Tool("explain", "อธิบายคลาส land cover", [], t_explain, "info"))
     registry.register(Tool("list_images", "แสดงภาพที่อัปโหลด", [], t_list_images, "info"))
     registry.register(Tool("export", "ส่งออกผลลัพธ์เป็น GeoTIFF", ["fmt"], t_export, "io"))
+    registry.register(Tool("fire_hotspots", "จุดความร้อน/การเผาไหม้ในจังหวัด (province=ชื่อจังหวัด)", ["province"], t_fire_hotspots, "analysis"))
     registry.register(Tool("help", "แสดงความสามารถของ agent", [], t_help, "info"))

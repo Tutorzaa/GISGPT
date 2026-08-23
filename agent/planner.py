@@ -14,6 +14,7 @@ keyword ที่รู้จัก:
 """
 
 _CLASSIFY = ["จำแนก", "landcover", "land cover", "land-cover", "classif", "ประเภทพื้นผิว", "แผนที่ปกคลุม"]
+_FIRE = ["เผา", "ไฟไหม้", "ไฟ", "hotspot", "จุดความร้อน", "จุดไฟ", "burn", "fire"]
 _INDEX = ["ndvi", "ndwi", "ndbi", "ดัชนี", "ดรรชนี", "index"]
 _STATS = ["สถิติ", "พื้นที่", "เปอร์เซ็น", "เปอร์เซ็นต์", "เท่าไหร่", "เท่าไร", "กี่", "area", "stat", "เฮกตาร์", "ไร่", "ตาราง"]
 _EXPLAIN = ["อธิบาย", "คลาส", "สี", "legend", "คือ", "หมายถึง", "แปล", "อะไร"]
@@ -33,6 +34,9 @@ class RulePlanner:
 
         if _hit(msg, _CLASSIFY):
             calls.append({"name": "classify", "args": {}})
+
+        if _hit(msg, _FIRE):
+            calls.append({"name": "fire_hotspots", "args": {}})
 
         if _hit(msg, _INDEX):
             which = "ndvi"
