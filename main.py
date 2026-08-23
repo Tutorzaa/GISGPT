@@ -11,6 +11,7 @@ from agent import Agent
 from agent import memory as mem
 from geo import airquality as aq
 from geo import analysis as an
+from geo import dashboard as dash
 from geo import hotspots as hs
 from geo import io as geo_io
 
@@ -108,6 +109,22 @@ def api_correlation():
         with open(f, encoding="utf-8") as fh:
             results.append(json.load(fh))
     return jsonify({"files": files, "results": results})
+
+
+@app.route("/dashboard")
+def dashboard_page():
+    return render_template("dashboard.html")
+
+
+@app.route("/api/dashboard")
+def api_dashboard():
+    province = request.args.get("province", "บุรีรัมย์")
+    start = request.args.get("start", "2023-04-01")
+    end = request.args.get("end", "2023-04-30")
+    data = dash.fetch_dashboard(province, start, end)
+    if "error" in data:
+        return jsonify(data), 404
+    return jsonify(data)
 
 
 @app.route("/outputs/<path:name>")

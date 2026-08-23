@@ -75,6 +75,14 @@ python main.py
 
 เปิด `platform/index.html` ใน browser (ไม่ต้องติดตั้ง) — จัดการเลเยอร์, นำเข้าไฟล์, ดูตาราง attribute
 
+### 3) Dashboard — Fire Emissions Watch สไตล์ 🆕
+
+```bash
+python main.py
+# เปิด http://localhost:5000/dashboard
+```
+แผนที่จุดไฟ (สีตาม FRP) + แผงกราฟวิเคราะห์ (ECharts) + แชท AI agent — ดูวิธีทำใน **[docs/DASHBOARD.md](docs/DASHBOARD.md)**
+
 ---
 
 ## ระบบ Agent ทำงานยังไง

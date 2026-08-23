@@ -127,3 +127,20 @@
 - outputs/phaseb_20200829_hotspot_count.png + _hotspot_sum_frp.png (cross-sectional)
 - outputs/phaseb_บุรีรัมย์_timeseries.png (time-series)
 - data/processed/phaseb_*.json (ข้อมูลดิบที่วิเคราะห์)
+
+## 2026-08-24 (รอบ 7) — Prototype Dashboard สไตล์ Fire Emissions Watch 🖥️
+
+### สร้าง (ตามโจทย์: แผนที่ + แผงกราฟซ้าย + AI agent)
+- `geo/dashboard.py` — รวมข้อมูล FIRMS archive หลายวัน → สรุป + อนุกรมรายวัน + แยกจังหวัด (shapely point-in-polygon, โหลด 77 จังหวัดครั้งเดียว)
+- `templates/dashboard.html` + `static/css/dashboard.css` + `static/js/dashboard.js` — ธีมเขียวเข้ม #0F4A57 ตาม reference, Leaflet (แผนที่จุดไฟสีตาม FRP) + ECharts (กราฟ FRP/วัน, แยกจังหวัด) + แชท AI agent
+- routes: `/dashboard` + `/api/dashboard?province=&start=&end=`
+
+### ทดสอบผ่าน
+- backend 7 วัน (2023-04-01..07): 357 จุด FRP 2150.2, peak 2023-04-05 (874 FRP), แยกจังหวัดถูก (บุรีรัมย์ 75, โคราช 70, ร้อยเอ็ด 54...) — 8.3 วิ/7 วัน
+- `/dashboard` HTTP 200 · `/api/dashboard` 200 ✅
+
+### บันทึก/ข้อจำกัด
+- จุดใน bbox ติดชายแดนกัมพูชา = "(นอกไทย/ทะเล)" (ยังไม่กรอง polygon ชายแดน)
+- FIRMS SP ดีเลย์ ~7-10 วัน → ข้อมูลสดต้องใช้ NRT (TODO)
+- reference ใช้ MapLibre+deck.gl+ECharts; prototype ใช้ Leaflet+ECharts (เบากว่า)
+- เขียน `docs/DASHBOARD.md` — วิธีทำ/กระบวนการ/สถาปัตยกรรม/roadmap

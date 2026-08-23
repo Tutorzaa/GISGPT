@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GISGPT — Fire Emissions Watch</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+  <header>
+    <div class="brand">🔥 GISGPT <span>Fire Emissions Watch</span></div>
+    <div class="controls">
+      <select id="province">
+        <option value="บุรีรัมย์" selected>บุรีรัมย์</option>
+        <option value="นครราชสีมา">นครราชสีมา</option>
+        <option value="ขอนแก่น">ขอนแก่น</option>
+        <option value="สุรินทร์">สุรินทร์</option>
+        <option value="ร้อยเอ็ด">ร้อยเอ็ด</option>
+        <option value="อุบลราชธานี">อุบลราชธานี</option>
+        <option value="เชียงใหม่">เชียงใหม่</option>
+        <option value="เชียงราย">เชียงราย</option>
+      </select>
+      <input type="date" id="start" value="2023-04-01">
+      <span>→</span>
+      <input type="date" id="end" value="2023-04-30">
+      <button id="apply">แสดง</button>
+    </div>
+    <button id="chat-toggle" class="chat-toggle">💬 AI Agent</button>
+  </header>
+
+  <div id="layout">
+    <!-- แผงกราฟวิเคราะห์ (ซ้าย) -->
+    <aside id="panel">
+      <div id="stats" class="stat-grid">
+        <div class="stat"><div class="stat-num" id="st-hot">–</div><div class="stat-label">จุดความร้อน</div></div>
+        <div class="stat"><div class="stat-num" id="st-frp">–</div><div class="stat-label">FRP รวม (MW)</div></div>
+        <div class="stat"><div class="stat-num" id="st-days">–</div><div class="stat-label">วันที่มีไฟ</div></div>
+        <div class="stat"><div class="stat-num" id="st-peak">–</div><div class="stat-label">วันพีค</div></div>
+      </div>
+      <div class="chart-card"><h3>ความร้อนรายวัน (FRP + จำนวนจุด)</h3><div id="chart-daily" class="chart"></div></div>
+      <div class="chart-card"><h3>แยกตามจังหวัด (FRP)</h3><div id="chart-province" class="chart"></div></div>
+    </aside>
+
+    <!-- แผนที่ -->
+    <main id="map"></main>
+
+    <!-- แชท AI agent -->
+    <aside id="chat" class="chat-closed">
+      <div class="chat-head">🤖 GISGPT Agent <span class="chat-sub">ถามเป็นภาษาไทย</span></div>
+      <div id="chat-log"></div>
+      <div class="chat-input">
+        <input type="text" id="chat-msg" placeholder="เช่น จุดไหนเผาเยอะสุด / สรุปสถานการณ์">
+        <button id="chat-send">ส่ง</button>
+      </div>
+    </aside>
+  </div>
+
+  <div id="loading" class="loading-hidden">⏳ กำลังโหลดข้อมูล... (FIRMS archive รายวัน)</div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
