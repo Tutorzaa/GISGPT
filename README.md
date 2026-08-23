@@ -155,10 +155,15 @@ output: (1, num_classes, 224, 224) logits ต่อพิกเซล (semantic 
 
 ## Roadmap
 
-- [ ] ดึงข้อมูล Sentinel-2 ผ่าน **Copernicus STAC API** — สั่งแชทเป็นพื้นที่/พิกัดได้ (เช่น "จำแนก land cover ที่บุรีรัมย์")
+> 🚜 ระบบเฝ้าระวังการเผาไร่เผานา (hotspot + ฝุ่น PM2.5 + ขอบเขตจังหวัดบุรีรัมย์) — แผนเต็มใน **[docs/BURN_MONITORING_PLAN.md](docs/BURN_MONITORING_PLAN.md)**
+
+- [ ] **Phase A** แผนที่ hotspot บุรีรัมย์ + ขอบเขตจังหวัด + จัดอันดับ FRP (GISTDA + NASA FIRMS)
+- [ ] **Phase B** ยืนยันข้ามข้อมูล: hotspot ↔ ฝุ่น/อุณหภูมิ GISTDA (correlation)
+- [ ] **Phase C** การเปลี่ยนแปลงพื้นที่สีเขียว / เมืองขยาย (Sentinel-2 2 ช่วงเวลา)
+- [ ] **Phase D** เลือกพื้นที่จากแผนที่ (ROI) + ผูกกับแชท agent + deploy HF Spaces
+- [ ] ดึงข้อมูล Sentinel-2 ผ่าน **Copernicus STAC API** — สั่งแชทเป็นพื้นที่/พิกัดได้
 - [ ] Fine-tune Prithvi จริงบน Colab → ใช้โมเดล land cover จริงในแอป
 - [ ] เปิดใช้สมอง LLM (`HF_TOKEN`) ให้เข้าใจคำสั่งซับซ้อนขึ้น
-- [ ] Deploy: Hugging Face Spaces (Gradio) + หน้า landing บน Vercel
 - [ ] แผนที่พื้นหลัง NASA GIBS ใน UI
 
 ---
