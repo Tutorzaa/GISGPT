@@ -35,6 +35,8 @@ def pearson(x, y):
     y = np.asarray(y, dtype="float64")
     if len(x) < 3 or len(x) != len(y):
         return 0.0, 1.0, len(x)
+    if np.ptp(x) == 0 or np.ptp(y) == 0:  # ข้อมูลคงที่ — หา correlation ไม่ได้
+        return 0.0, 1.0, len(x)
     try:
         from scipy import stats
 
@@ -121,7 +123,7 @@ def render_scatter(result, out_path, title="", xlabel="", ylabel=""):
     ys = [p["y"] for p in pts] if "y" in (pts[0] if pts else {}) else [p["pm25"] for p in pts]
     fig, ax = plt.subplots(figsize=(6, 4.2), dpi=110)
     ax.scatter(xs, ys, alpha=0.75, color="#4f8cff", edgecolor="white", linewidth=0.4)
-    if len(xs) > 2:
+    if len(xs) > 2 and np.ptp(xs) > 0 and np.ptp(ys) > 0:
         m, b = np.polyfit(xs, ys, 1)
         ax.plot(xs, [m * x + b for x in xs], "--", color="#34d399", lw=1.2)
     ax.set_title(f"{title}\nr = {result.get('r')}, p = {result.get('p')} (n={result.get('n')})", fontsize=10)

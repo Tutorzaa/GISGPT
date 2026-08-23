@@ -76,14 +76,18 @@ def _epoch(ms):
 # --------------------------------------------------------------------------
 # NASA FIRMS archive (ต้อง FIRMS_KEY) — hotspot รายวันย้อนหลัง
 # --------------------------------------------------------------------------
-def fetch_firms_archive(bbox, day, month, year, dataset="VIIRS_SNPP"):
-    """hotspot 1 วัน (archive) — คืน list dict สกุลเดียวกับ geo/hotspots"""
+def fetch_firms_archive(bbox, date, dataset="VIIRS_SNPP_SP", day_range=1):
+    """hotspot ย้อนหลัง (Standard Processing) — คืน (list dict, dataset)
+
+    format ปัจจุบัน: /area/csv/{key}/{dataset}/{bbox}/{day_range}/{YYYY-MM-DD}
+    ข้อมูลเก่าใช้ *_SP (NRT มีแค่ ~10 วันหลัง)
+    """
     key = os.environ.get("FIRMS_KEY") or os.environ.get("FIRMS_MAP_KEY")
     if not key:
         return [], "no FIRMS_KEY"
     url = (
         f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{key}/{dataset}"
-        f"/{bbox[0]},{bbox[1]},{bbox[2]},{bbox[3]}/{day}/{month}/{year}"
+        f"/{bbox[0]},{bbox[1]},{bbox[2]},{bbox[3]}/{day_range}/{date}"
     )
     r = requests.get(url, timeout=30)
     r.raise_for_status()
@@ -108,7 +112,7 @@ def fetch_firms_archive(bbox, day, month, year, dataset="VIIRS_SNPP"):
             "confidence": conf, "frp": round(frp, 3),
             "satellite": row.get("satellite", ""),
             "datetime": f"{row.get('acq_date', '')} {row.get('acq_time', '')}".strip(),
-            "source": "firms-archive",
+            "source": "firms-" + dataset.lower(),
         })
     return out, dataset
 

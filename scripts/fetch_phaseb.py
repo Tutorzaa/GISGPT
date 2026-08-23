@@ -23,6 +23,15 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
+# โหลด .env (คีย์ API) ถ้ามี
+_env = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+if os.path.exists(_env):
+    for line in open(_env, encoding="utf-8"):
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, _, v = line.partition("=")
+            os.environ.setdefault(k.strip(), v.strip())
+
 from geo import airquality as aq
 from geo import analysis as an
 from geo import hotspots as hs
@@ -34,8 +43,10 @@ def cross_sectional(date, radius, out_prefix):
     aq_stations = aq.fetch_gistda_aq()
     print(f"📡 สถานี AQ: {len(aq_stations)} (วันที่: {aq_stations[0]['datetime'] if aq_stations else '?'})")
 
-    hotspots, src = aq.fetch_firms_archive(TH_BBOX, *[int(x) for x in date.split("-")[::-1]])
-    print(f"🔥 hotspot FIRMS archive {date}: {len(hotspots)} จุด (source={src})")
+    hotspots, src = aq.fetch_firms_archive(TH_BBOX, date)
+    hs2, src2 = aq.fetch_firms_archive(TH_BBOX, date, dataset="MODIS_SP")
+    hotspots.extend(hs2)
+    print(f"🔥 hotspot FIRMS archive {date}: {len(hotspots)} จุด (VIIRS={len(hotspots)-len(hs2)}, MODIS={len(hs2)})")
     for h in hotspots:
         h["score"] = h["frp"] if h["frp"] > 0 else h["confidence"]
 
@@ -71,7 +82,7 @@ def time_series(province, start, end, out_prefix):
     d = dt.date.fromisoformat(start)
     end_d = dt.date.fromisoformat(end)
     while d <= end_d:
-        hs_day, _ = aq.fetch_firms_archive(bbox, d.day, d.month, d.year)
+        hs_day, _ = aq.fetch_firms_archive(bbox, d.isoformat())
         days.extend(hs_day)
         d += dt.timedelta(days=1)
     series = aq.daily_series(days)
