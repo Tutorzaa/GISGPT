@@ -16,8 +16,11 @@
 - Flask (test client) ✅ GET /, /api/upload, /api/chat, /outputs/* (ภาพ PNG ออก HTTP 200)
 - `scripts/finetune.py --synthetic` ✅ เทรน+eval+export ONNX (1,1,6,224,224)→(1,4,224,224) — fallback CNN เล็กเมื่อไม่มี terratorch/GPU
 - แอป + ONNX รวมกัน ✅ pipeline สลับโหมด baseline → **Prithvi (ONNX)** อัตโนมัติเมื่อมี .onnx ใน models/ (tiling 224/112 + stitch + class_names.json + export GeoTIFF)
+- **ข้อมูลจริง (HLS Mexico จาก repo Prithvi-EO-2.0-300M)** ✅ ดาวน์โหลด data/sample/mexico_hls.tif (6 แบนด์ int16, 560×448, EPSG:32613) — pipeline อ่าน/จำแนก/NDVI/พื้นที่ ผ่าน
 
 ### บันทึก
 - คอนโซล Windows (cp1252) อ่านไทยไม่ได้ → ต้อง `PYTHONIOENCODING=utf-8` (แก้ในสคริปต์แล้วบางส่วน)
-- HF ยังไม่ login — Prithvi-EO-2.0 เป็น gated ต้องกด accept license ก่อน (TODO)
-- `models/prithvi_landcover_demo.*` คือโมเดลทดสอบ (CNN เล็ก) — ลบทิ้งเมื่อได้โมเดลจริง
+- **Prithvi-EO-2.0-300M ไม่ gated** (Apache-2.0) — ดาวน์โหลดได้เลยไม่ต้องยอมรับ license; login HF จำเป็นตอน push โมเดล
+- preprocessing ของ IBM (inference.py): z-score ตาม config.json สำหรับ MAE pretrained — แต่โมเดลที่ fine-tune จาก Sen4Map ใช้ constant_scale 0.0001 (= /10000) ซึ่งตรงกับ geo/indices.to_reflectance แล้ว
+- baseline มีขีดจำกัด: NDBI แยกเมืองกับดินโล่งไม่ออก (Mexico tile ได้ built-up เกินจริง) — รอโมเดล Prithvi จริงแก้
+- `models/prithvi_landcover_demo.*` คือโมเดลทดสอบ (CNN เล็ก) **ย้ายไป models/demo/** แล้ว — ลบทิ้งได้เมื่อได้โมเดลจริง
