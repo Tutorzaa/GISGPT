@@ -24,3 +24,15 @@
 - preprocessing ของ IBM (inference.py): z-score ตาม config.json สำหรับ MAE pretrained — แต่โมเดลที่ fine-tune จาก Sen4Map ใช้ constant_scale 0.0001 (= /10000) ซึ่งตรงกับ geo/indices.to_reflectance แล้ว
 - baseline มีขีดจำกัด: NDBI แยกเมืองกับดินโล่งไม่ออก (Mexico tile ได้ built-up เกินจริง) — รอโมเดล Prithvi จริงแก้
 - `models/prithvi_landcover_demo.*` คือโมเดลทดสอบ (CNN เล็ก) **ย้ายไป models/demo/** แล้ว — ลบทิ้งได้เมื่อได้โมเดลจริง
+
+## 2026-08-23 (รอบ 2) — เล่นกับโมเดลจริง + เจอข้อมูลสำคัญ
+- ✅ login HF สำเร็จ (`Peeradon4778`) — token จาก `hf auth login`
+- ✅ ดาวน์โหลด checkpoint จริง `Prithvi_EO_V2_300M.pt` (1.33GB) + config/prithvi_mae.py/inference.py ไว้ที่ `models/pretrained/`
+- ✅ ดาวน์โหลดภาพตัวอย่างจริงครบ 4 เฟรม HLS Mexico (T13REM) ไว้ที่ `data/sample/`
+- ✅ **รัน MAE reconstruction บน CPU ได้จริง: 1.1 นาที/ชุด 4 เฟรม** (โมเดล 330M params) → outputs/mae_demo/preview_t0..3.png (4 แผง: ต้นฉบับ/สร้างใหม่/mask/ซ้อนทับ)
+- 🔍 **ค้นพบ: pretrain bands = B02,B03,B04,B05,B06,B07** (น้ำเงิน→เรดเอจ) — ไม่ใช่ NIR/SWIR; config.json มี mean/std สำหรับ z-score; โมเดลฝึกด้วย 4 time steps
+  - ผลต่อโครงการ: `finetune.py` เลือกแบนด์ index 0–5 ของ Sen4Map = ตรงกับ pretrain bands พอดี ✅
+  - ภาพที่อัปโหลดเข้าแอปต้องเลือกแบนด์ B02–B07 (แก้ docstring geo/landcover.py แล้ว)
+- ✅ เขียน `notebooks/01_explore_prithvi.ipynb` — ดู MAE reconstruction บน CPU
+- เพิ่ม `einops` ใน env `ml` (inference.py ของ IBM ต้องการ)
+- ทดสอบ: notebook 01 JSON ผ่าน, inference.py รันจบ returncode 0

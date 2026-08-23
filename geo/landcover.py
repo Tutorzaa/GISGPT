@@ -4,6 +4,10 @@
 - input : (B=1, T=1, C=6, H=224, W=224) float32, reflectance 0–1
 - output: (1, num_classes, 224, 224) logits ต่อพิกเซล (semantic segmentation)
 วางไฟล์ `<ชื่อ>.onnx` กับ `<ชื่อ>_classes.json` ไว้ใน models/ แล้วแอปจะใช้ทันที
+
+⚠️ ลำดับแบนด์ 6 ช่อง ต้องตรงกับที่โมเดลฝึก: Prithvi-EO-2.0 pretrain ใช้
+B02,B03,B04,B05,B06,B07 (น้ำเงิน→เรดเอจ) — finetune จาก Sen4Map เลือก index 0–5
+ซึ่งตรงกันพอดี; ภาพที่อัปโหลดควรเลือกแบนด์ลำดับนี้ (ไม่ใช่ HLS NIR/SWIR)
 """
 import json
 import os
