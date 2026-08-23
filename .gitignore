@@ -1,10 +1,19 @@
-# ข้อมูลและโมเดลขนาดใหญ่ — ไม่ push ขึ้น GitHub
-data/raw/
-data/sample/*.tif
-models/
-outputs/
+# Python
 __pycache__/
 *.pyc
+.ipynb_checkpoints/
+
+# ข้อมูลและโมเดลขนาดใหญ่ — ไม่ push ขึ้น GitHub
+data/
+data/raw/
+data/sample/*.tif
+demo_sentinel2.tif
+*.tif
+*.tiff
+models/
+models/pretrained/
+outputs/
+
+# ความลับ / สภาพแวดล้อม
 .env
 .venv/
-.ipynb_checkpoints/

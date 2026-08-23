@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GISGPT — GIS Platform</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.3.1/ol.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span><b>GISGPT</b><span class="sys">// GIS PLATFORM</span></div>
+    <div class="imports">
+      <button class="btn" id="btnGeo">+ GEOJSON</button>
+      <button class="btn" id="btnShp">+ SHAPEFILE</button>
+      <button class="btn" id="btnKml">+ KML/GPX</button>
+      <button class="btn ghost" id="btnSample">LOAD SAMPLE</button>
+    </div>
+    <div class="basemaps">
+      <button class="btn bm active" data-bm="osm">STREET</button>
+      <button class="btn bm" data-bm="esri">ESRI SAT</button>
+      <button class="btn bm" data-bm="gistda">GISTDA 2M</button>
+    </div>
+    <input type="file" id="fileGeo" accept=".geojson,.json" hidden>
+    <input type="file" id="fileShp" accept=".zip,.shp" hidden>
+    <input type="file" id="fileKml" accept=".kml,.gpx" hidden>
+  </header>
+
+  <aside class="sidebar">
+    <div class="side-head"><span class="eyebrow">LAYERS</span><span id="layerCount" class="count">0</span></div>
+    <div class="layer-list" id="layerList">
+      <div class="empty">ไม่มีชั้นข้อมูล — กด LOAD SAMPLE หรือนำเข้าไฟล์ด้านบน</div>
+    </div>
+  </aside>
+
+  <div id="map" class="map"></div>
+  <div class="popup" id="popup"></div>
+
+  <section class="table-panel" id="tablePanel">
+    <div class="table-head">
+      <b id="tableTitle">ATTRIBUTE TABLE</b>
+      <span id="tableCount" class="count"></span>
+      <input id="tableSearch" class="search" placeholder="Search..." autocomplete="off">
+      <button class="btn small" id="tableClose" title="Close">✕</button>
+    </div>
+    <div class="table-wrap"><table id="table"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <div class="statusbar">
+    <span id="stZoom">Z —</span>
+    <span id="stCoord">LON — | LAT —</span>
+    <span id="stFeatures">0 features</span>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/ol@10.3.1/dist/ol.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shpjs@6.0.1/dist/shp.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.1.0/turf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mapbox/togeojson@0.16.0/togeojson.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/map.js"></script>
+<script src="js/layers.js"></script>
+<script src="js/import.js"></script>
+<script src="js/table.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

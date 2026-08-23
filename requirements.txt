@@ -1,3 +1,4 @@
+# แอป GISGPT (Flask agent)
 flask
 numpy
 rasterio
@@ -8,3 +9,8 @@ pillow
 folium
 huggingface_hub
 requests
+einops
+
+# โน้ตบุ๊กวิเคราะห์ดาวเทียม (learning path เดิม)
+jupyter>=1.0
+geopandas>=0.14

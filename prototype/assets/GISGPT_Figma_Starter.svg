@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1000" viewBox="0 0 1440 1000">
+<rect width="1440" height="1000" fill="#050505"/>
+<!-- Desktop frame -->
+<rect x="40" y="40" width="1360" height="560" rx="4" fill="#0b0b0d" stroke="#2b2b30"/>
+<rect x="40" y="40" width="1360" height="62" fill="#070708" stroke="#2b2b30"/>
+<rect x="60" y="63" width="15" height="15" fill="#fff"/>
+<text x="87" y="77" fill="#fff" font-family="Arial" font-size="16" font-weight="700" letter-spacing="2">GISGPT</text>
+<text x="190" y="77" fill="#777" font-family="Arial" font-size="10">SYS: STABLE // SATELLITE MODE</text>
+<rect x="930" y="53" width="330" height="38" rx="5" fill="#111114" stroke="#303036"/>
+<text x="947" y="77" fill="#777" font-family="Arial" font-size="11">⌕  Search place, coordinates, Plus Code...</text>
+<rect x="1274" y="53" width="106" height="38" rx="5" fill="#151518" stroke="#303036"/>
+<text x="1292" y="77" fill="#eee" font-family="Arial" font-size="9" letter-spacing="1">CONNECT STREAM</text>
+<!-- map -->
+<rect x="41" y="103" width="1358" height="496" fill="#5d5d5d"/>
+<path d="M500 120 L700 160 L780 260 L690 360 L820 480 L530 560 L420 430 L460 280Z" fill="#777" stroke="#aaa"/>
+<path d="M420 160 L1260 540 M380 300 L1320 240 M600 120 L620 580 M960 120 L900 580" stroke="#a5a5a5" stroke-width="7" opacity=".55"/>
+<rect x="700" y="250" width="340" height="210" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="700" y="230" width="125" height="25" rx="4" fill="#111"/>
+<text x="712" y="247" fill="#fff" font-family="Arial" font-size="9" font-weight="700">TARGET: ROI_01</text>
+<!-- tools -->
+<rect x="1340" y="125" width="38" height="38" rx="5" fill="#0b0b0d" stroke="#303036"/><text x="1353" y="150" fill="#fff" font-size="18">+</text>
+<rect x="1340" y="169" width="38" height="38" rx="5" fill="#0b0b0d" stroke="#303036"/><text x="1353" y="194" fill="#fff" font-size="18">−</text>
+<rect x="1340" y="213" width="38" height="38" rx="5" fill="#0b0b0d" stroke="#303036"/><text x="1352" y="237" fill="#fff" font-size="14">◫</text>
+<!-- chat drawer -->
+<rect x="40" y="103" width="370" height="496" fill="#09090b" stroke="#303036"/>
+<text x="62" y="140" fill="#fff" font-family="Arial" font-size="11" font-weight="700" letter-spacing="1.5">TELEMETRY TERMINAL</text>
+<text x="62" y="158" fill="#777" font-family="Arial" font-size="9">Active session: gisgpt-demo_01</text>
+<line x1="40" y1="175" x2="410" y2="175" stroke="#2b2b30"/>
+<rect x="62" y="205" width="326" height="120" rx="7" fill="#111114" stroke="#29292e"/>
+<text x="77" y="228" fill="#777" font-family="Arial" font-size="9">GISGPT // CORE-V4</text>
+<text x="77" y="252" fill="#eee" font-family="Arial" font-size="11">GISGPT ready. Select an area on</text>
+<text x="77" y="270" fill="#eee" font-family="Arial" font-size="11">the map, then ask a question.</text>
+<rect x="62" y="525" width="280" height="48" rx="6" fill="#101013" stroke="#29292e"/>
+<text x="76" y="553" fill="#666" font-family="Arial" font-size="10">Prompt GISGPT...</text>
+<rect x="350" y="525" width="38" height="48" rx="6" fill="#151518" stroke="#303036"/>
+<text x="364" y="555" fill="#fff" font-size="18">↑</text>
+
+<!-- Mobile frame -->
+<rect x="520" y="650" width="360" height="320" rx="22" fill="#0b0b0d" stroke="#444"/>
+<rect x="520" y="650" width="360" height="44" rx="22" fill="#070708"/>
+<rect x="532" y="666" width="12" height="12" fill="#fff"/>
+<text x="553" y="678" fill="#fff" font-family="Arial" font-size="11" font-weight="700" letter-spacing="1.5">GISGPT // M</text>
+<rect x="532" y="706" width="336" height="38" rx="6" fill="#111114" stroke="#303036"/>
+<text x="545" y="730" fill="#777" font-family="Arial" font-size="9">⌕  Search place, coordinates...</text>
+<rect x="520" y="750" width="360" height="220" fill="#666"/>
+<path d="M560 790 L820 760 M545 840 L850 910 M680 750 L660 970" stroke="#aaa" stroke-width="6" opacity=".5"/>
+<rect x="640" y="830" width="150" height="85" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6 5"/>
+<circle cx="824" cy="930" r="26" fill="#fff"/><text x="816" y="937" fill="#000" font-size="18">□</text>
+<text x="50" y="625" fill="#777" font-family="Arial" font-size="9">FIGMA STARTER — import this SVG into Figma, then convert text/frames into components.</text>
+</svg>

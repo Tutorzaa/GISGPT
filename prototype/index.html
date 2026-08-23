@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>GISGPT — Geographic Chatbot Prototype</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="map" class="map"></div>
+
+  <div class="loading" id="loading">
+    <img src="assets/gisgpt-logo.png" alt="GISGPT">
+    <div class="loadbar"><i></i></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span><b>GISGPT</b><span class="sys">// M</span></div>
+    <div class="sys" id="systemText">SYS: STABLE // SATELLITE MODE</div>
+    <div class="search"><span>⌕</span><input id="searchInput" placeholder="Search place, coordinates, Plus Code..." autocomplete="off"></div>
+    <button class="btn connect" id="connectBtn">CONNECT STREAM</button>
+  </header>
+
+  <div class="select-badge" id="selectBadge">DRAW RECTANGLE — SET AREA SIZE AFTER SELECTION</div>
+
+  <div class="map-tools">
+    <button class="tool" id="zoomIn">+</button>
+    <button class="tool" id="zoomOut">−</button>
+    <button class="tool" id="layers" title="Satellite / Street">◫</button>
+    <button class="tool" id="locate" title="My location">⌖</button>
+    <button class="tool small" id="measure" title="Select area">▣</button>
+    <button class="tool small" id="reset" title="Reset view">↺</button>
+  </div>
+
+  <div class="selection-info" id="selectionInfo">
+    <div class="selection-title">SELECTED ROI</div>
+    <div class="selection-size" id="selectionSize">0.00 km²</div>
+    <div id="selectionDim" style="font-size:9px;color:#888">—</div>
+    <div class="selection-actions">
+      <button class="btn" id="editArea">SET SIZE</button>
+      <button class="btn" id="askArea">ASK GISGPT</button>
+    </div>
+  </div>
+
+  <div class="legend" id="legend">
+    <b style="font-size:9px;letter-spacing:1px">ANALYSIS OVERLAY</b>
+    <div><span class="swatch"></span> detected area</div>
+    <div><span class="swatch dash"></span> ROI boundary</div>
+  </div>
+
+  <button class="chat-toggle" id="chatToggle" aria-label="Open chat">▢</button>
+
+  <aside class="chat-panel" id="chatPanel">
+    <div class="chat-head">
+      <div class="eyebrow">TELEMETRY TERMINAL</div>
+      <div class="sub" id="session">Active session: gisgpt-demo_01</div>
+    </div>
+    <div class="messages" id="messages">
+      <div class="msg assistant">
+        <div class="meta">GISGPT // CORE-V4</div>
+        <div class="bubble">
+          GISGPT ready. Select an area on the map, then ask a geographic question.
+          <div class="scenario-list">
+            <button class="scenario" data-q="วิเคราะห์สิ่งปลูกสร้างในพื้นที่นี้">BUILDINGS</button>
+            <button class="scenario" data-q="วิเคราะห์พื้นที่สีเขียว">GREEN SPACE</button>
+            <button class="scenario" data-q="วิเคราะห์ถนนและเส้นทาง">ROADS</button>
+            <button class="scenario" data-q="วิเคราะห์แหล่งน้ำ">WATER</button>
+            <button class="scenario" data-q="วิเคราะห์การใช้ประโยชน์ที่ดิน">LAND USE</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="composer">
+      <textarea id="composer" placeholder="Prompt GISGPT (e.g. Identify buildings in area...)"></textarea>
+      <button class="btn send" id="send">↑</button>
+    </div>
+  </aside>
+
+  <div class="modal" id="areaModal">
+    <div class="modal-card">
+      <h3>DEFINE ROI SIZE</h3>
+      <p>กำหนดขนาดกรอบพื้นที่ที่เลือกได้เอง โดยให้จุดกึ่งกลางเดิมคงอยู่</p>
+      <div class="fields">
+        <div class="field"><label>WIDTH (km)</label><input id="widthInput" type="number" min=".05" step=".05" value="1"></div>
+        <div class="field"><label>HEIGHT (km)</label><input id="heightInput" type="number" min=".05" step=".05" value="1"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelModal">CANCEL</button>
+        <button class="btn" id="applyModal">APPLY</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
