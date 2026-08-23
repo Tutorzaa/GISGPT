@@ -23,8 +23,9 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader, Dataset
 
-# ลำดับแบนด์ 6 ช่อง ที่ตรงกับแอป (geo/landcover.py) — HLS order
-BANDS6 = ["BLUE", "GREEN", "RED", "NIR_BROAD", "SWIR_1", "SWIR_2"]
+# ลำดับแบนด์ 6 ช่อง ที่ตรงกับ pretrain ของ Prithvi-EO-2.0: B02–B07 (น้ำเงิน→เรดเอจ)
+# Sen4Map 10 แบนด์เริ่มด้วย [BLUE,GREEN,RED,RE1,RE2,RE3,...] → index 0–5 ตรงกันพอดี
+BANDS6 = ["BLUE", "GREEN", "RED", "RED_EDGE_1", "RED_EDGE_2", "RED_EDGE_3"]
 
 # คลาส land cover ของ Sen4Map (10 คลาส LUCAS 2018)
 CLASS_NAMES = [
@@ -97,7 +98,7 @@ class LandCoverDataset(Dataset):
 class SyntheticLandCover(Dataset):
     """ข้อมูลจำลอง 6 แบนด์ 4 คลาส — ใช้เทสต์ pipeline โดยไม่ต้องโหลดข้อมูลจริง."""
 
-    def __init__(self, n=400, size=64, seed=0):
+    def __init__(self, n=400, size=224, seed=0):
         rng = np.random.default_rng(seed)
         self.n, self.size = n, size
         sig = np.array(
@@ -161,14 +162,14 @@ class _TinyCNN(torch.nn.Module):
         return self.net(x)
 
 
-def build_model(num_classes=4):
+def build_model(num_classes=4, checkpoint=None):
     try:
         from terratorch.models import PrithviModelFactory
 
-        model = PrithviModelFactory.build_model(
+        model = PrithviModelFactory().build_model(
             task="segmentation",
             backbone="prithvi_eo_v2_300",
-            decoder="UPerNetDecoder",
+            decoder="UperNetDecoder",  # r ตัวเล็ก — ชื่อที่ลงทะเบียนใน terratorch
             in_channels=6,
             bands=BANDS6,
             num_frames=1,
@@ -176,8 +177,9 @@ def build_model(num_classes=4):
             pretrained=True,
             backbone_pretrain_img_size=224,
             backbone_patch_size=16,
+            ckpt_path=checkpoint,  # terratorch 1.2.x: ใช้ ckpt_path แทน pretrained_cfg_overlay
         )
-        print("✅ โหลด Prithvi-EO-2.0-300M + UPerNet head จาก Hugging Face (terratorch)")
+        print("✅ โหลด Prithvi-EO-2.0-300M + UPerNet head จาก checkpoint")
         return _SegWrapper(model, dict_input=True)
     except Exception as e:
         print("⚠️ terratorch โหลดไม่ได้:", e)
@@ -277,6 +279,7 @@ def main():
     ap.add_argument("--batch", type=int, default=8)
     ap.add_argument("--patch", type=int, default=224)
     ap.add_argument("--onnx", default="prithvi_landcover.onnx")
+    ap.add_argument("--checkpoint", default=None, help="path ไปยัง Prithvi_EO_V2_300M.pt (ถ้ามี ไม่ต้องโหลดซ้ำจากเน็ต)")
     ap.add_argument("--push", help="repo_id บน HF เช่น peeradon4778/prithvi-landcover-th")
     ap.add_argument("--cpu", action="store_true", help="บังคับ CPU (ไม่ใช้ GPU)")
     args = ap.parse_args()
@@ -286,8 +289,9 @@ def main():
 
     if args.synthetic or not (args.train and args.val):
         print("🧪 โหมดข้อมูลจำลอง (4 คลาส)")
-        train_ds = SyntheticLandCover(n=800)
-        val_ds = SyntheticLandCover(n=200, seed=1)
+        n = min(800, args.subset) if args.subset else 800
+        train_ds = SyntheticLandCover(n=n)
+        val_ds = SyntheticLandCover(n=min(200, n // 2), seed=1)
         num_classes = 4
     else:
         print("🌍 โหลด Sen4Map...")
@@ -298,7 +302,7 @@ def main():
     train_ld = DataLoader(train_ds, batch_size=args.batch, shuffle=True, num_workers=0)
     val_ld = DataLoader(val_ds, batch_size=args.batch, shuffle=False, num_workers=0)
 
-    model = build_model(num_classes).to(device)
+    model = build_model(num_classes, checkpoint=args.checkpoint).to(device)
     train(model, train_ld, args.epochs, device=device)
     evaluate(model, val_ld, device=device)
 

@@ -1,5 +1,8 @@
 # GISGPT Prototype
 
+> 📌 นี่คือ **prototype เดิม** (Leaflet chat demo) — ระบบปัจจุบันคือ Flask agent app (`main.py`)
+> + Web GIS platform (`platform/`) ดู [README](../README.md)
+
 ## Files
 
 ```

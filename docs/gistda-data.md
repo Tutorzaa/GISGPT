@@ -2,6 +2,14 @@
 
 ที่มา: https://opendata.gistda.or.th (ระบบ CKAN — เข้าถึงผ่าน API สด ไม่ได้เก็บข้อมูลบน GitHub)
 
+## 0. ภาพรวมแพลตฟอร์ม GISTDA
+
+| แพลตฟอร์ม | URL | ใช้ทำอะไร |
+|---|---|---|
+| **NSDC (National Space Data Platform)** | https://nsdc.gistda.or.th | แพลตฟอร์มข้อมูลอวกาศแห่งชาติ — THEOS-2 (ดาวเทียมไทย), ข้อมูล Copernicus |
+| **Open Data (CKAN)** | https://opendata.gistda.or.th | ค้นหาชุดข้อมูลเปิด (ไม่ต้องคีย์) |
+| **API Gateway** | https://api-gateway.gistda.or.th | ดึงข้อมูลจริง (ต้องสมัครคีย์ฟรี) |
+
 ## 1. วิธีเข้าถึง
 
 | API | ต้องใช้คีย์? | ใช้ทำอะไร |

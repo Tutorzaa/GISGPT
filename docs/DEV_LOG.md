@@ -36,3 +36,12 @@
 - ✅ เขียน `notebooks/01_explore_prithvi.ipynb` — ดู MAE reconstruction บน CPU
 - เพิ่ม `einops` ใน env `ml` (inference.py ของ IBM ต้องการ)
 - ทดสอบ: notebook 01 JSON ผ่าน, inference.py รันจบ returncode 0
+
+## 2026-08-23 (รอบ 3) — de-risk โค้ดเทรน + รวม repo GitHub
+- ✅ ติดตั้ง `terratorch 1.2.11` ใน env `ml` (ไม่กระทบ torch/torchvision เดิม) และทดสอบ `PrithviModelFactory` จริงบน CPU
+- 🔧 แก้ API terratorch 1.2.x 3 จุด: (1) `PrithviModelFactory()` ต้อง instantiate ก่อน (2) ใช้ `ckpt_path=` แทน `pretrained_cfg_overlay` (ถูกถอดออกแล้ว) (3) ชื่อ decoder ต้องเป็น `UperNetDecoder` (r ตัวเล็ก)
+- ✅ `finetune.py --synthetic` + checkpoint จริง: โหลด Prithvi-EO-2.0-300M + UPerNet + เทรน + export ONNX (1,1,6,224,224)→(1,4,224,224) ผ่าน — แต่ smoke onnx ถูกลบแล้ว (เทรนแค่ 1 epoch บนข้อมูลจำลอง)
+- ✅ เปลี่ยนชื่อ notebook: `01_explore_prithvi` → `03-explore-prithvi-mae`, `02_finetune_landcover_colab` → `04-finetune-landcover-colab` (ให้เลขต่อจาก learning path เดิม 01/02)
+- 📦 **รวม repo GitHub**: merge งานนี้เข้ากับ `github.com/Tutorzaa/GISGPT` (branch main) — รวมประวัติทั้ง 2 ฝั่ง (ของเดิม: platform/OpenLayers + prototype + learning notebooks)
+- 📝 อัปเดตเอกสาร: README ใหม่ (สถาปัตยกรรม agent + ผลทดสอบ + roadmap), satellite-data.md (API ล่าสุด: Copernicus STAC, NASA GIBS/POWER, NSDC), gistda-data.md (+NSDC/THEOS-2), PROTOTYPE.md (ชี้ระบบใหม่)
+- ผล: merge คอนฟลิกแค่ .gitignore + requirements.txt (รวมกันแล้ว)
