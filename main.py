@@ -9,6 +9,8 @@ from flask import Flask, jsonify, render_template, request, send_from_directory,
 
 from agent import Agent
 from agent import memory as mem
+from geo import airquality as aq
+from geo import analysis as an
 from geo import hotspots as hs
 from geo import io as geo_io
 
@@ -63,6 +65,40 @@ def api_hotspots():
     if "error" in data:
         return jsonify(data), 404
     return jsonify(data)
+
+
+@app.route("/api/airquality")
+def api_airquality():
+    """สถานีวัดอากาศที่ใกล้จังหวัดที่สุด + ค่า PM2.5/PM10"""
+    province = request.args.get("province", "บุรีรัมย์")
+    feature, pname = hs.find_province(province)
+    if feature is None:
+        return jsonify(error=f"ไม่พบจังหวัด '{province}'"), 404
+    bbox = hs.province_bbox(feature, margin=0.0)
+    lat = (bbox[1] + bbox[3]) / 2
+    lon = (bbox[0] + bbox[2]) / 2
+    stations = aq.fetch_gistda_aq()
+    nearest = an.nearest_stations(lat, lon, stations, k=5)
+    return jsonify({"province": pname, "center": {"lat": lat, "lon": lon}, "stations": nearest})
+
+
+@app.route("/api/correlation")
+def api_correlation():
+    """ผลลัพธ์ Phase B (จาก scripts/fetch_phaseb.py) — ถ้ายังไม่รันจะบอกวิธี"""
+    import glob
+
+    files = sorted(glob.glob(os.path.join(BASE_DIR, "data", "processed", "phaseb_*.json")))
+    if not files:
+        return jsonify({
+            "note": "ยังไม่มีการวิเคราะห์ — รัน `python scripts/fetch_phaseb.py --date 2020-08-29` "
+                    "(ต้องมี FIRMS_KEY ใน .env) ก่อน",
+            "files": [],
+        })
+    results = []
+    for f in files:
+        with open(f, encoding="utf-8") as fh:
+            results.append(json.load(fh))
+    return jsonify({"files": files, "results": results})
 
 
 @app.route("/outputs/<path:name>")
