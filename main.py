@@ -17,6 +17,15 @@ from geo import io as geo_io
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUTS = os.path.join(BASE_DIR, "outputs")
 
+# โหลด .env (คีย์ API) ถ้ามี
+_env = os.path.join(BASE_DIR, ".env")
+if os.path.exists(_env):
+    for line in open(_env, encoding="utf-8"):
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, _, v = line.partition("=")
+            os.environ.setdefault(k.strip(), v.strip())
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gisgpt-dev-key")
 agent = Agent()
