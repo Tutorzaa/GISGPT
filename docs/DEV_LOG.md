@@ -71,3 +71,27 @@
 ### หมายเหตุ
 - ข้อมูล GISTDA เป็นชุดตัวอย่าง (วันเดียว) — ใช้เป็น demo/validation; FIRMS (ถ้ามีคีย์) จะให้ข้อมูลสด
 - Phase B ต่อไป: ดึง AirQuality_daily + spatial join กับ hotspot 47t โคราช + correlation
+
+## 2026-08-23 (รอบ 5) — Phase B: ได้ผล correlation จริง! 📊
+
+### สร้าง backend Phase B
+- `geo/analysis.py` — engine: Haversine, สถานีใกล้สุด, Pearson r/p (scipy), cross-sectional, time-series, scatter PNG
+- `geo/airquality.py` — fetchers: GISTDA AQ (✅ 70 สถานี), FIRMS archive (✅), OpenAQ v3 (❌ ไม่มีสถานีไทยแล้ว), CAMS EAC4 (รอคีย์)
+- `scripts/fetch_phaseb.py` — CLI: `--date` (cross-sectional) / `--timeseries` (รายวัน)
+- API: `/api/airquality` ✅ + `/api/correlation`
+- `.env` loader + `.env.example` (FIRMS/OpenAQ/CAMS) — โหลดอัตโนมัติทุก entry point
+
+### 🔍 ข้อจำกัดข้อมูลที่เจอ (สำคัญ)
+- GISTDA AQ (2020-08-29) กับ GISTDA hotspot (2023-04-06) **คนละวัน** — เทียบตรงๆ ไม่ได้
+- Air4Thai/PCD API ตาย (403/404) · OpenAQ ไม่มีสถานีไทยใน v3 แล้ว
+- FIRMS API format เปลี่ยน: ต้องใช้ `/{DAY_RANGE}/{YYYY-MM-DD}` + `_SP` (Standard Processing) สำหรับข้อมูลเก่า
+
+### ✅ ผล Phase B จริง (FIRMS archive + GISTDA AQ วันที่ 2020-08-29, รัศมี 100 กม.)
+- hotspot: 123 จุด (VIIRS 122 + MODIS 1) · สถานีที่มี hotspot+pm25: 52/70
+- **correlation hotspot_count vs PM2.5: r=0.326, p=0.0059 (n=70) — มีนัยสำคัญ**
+- **correlation hotspot_sum_frp vs PM2.5: r=0.319, p=0.0071 — มีนัยสำคัญ**
+- สรุป: สถานีที่อยู่ใกล้ hotspot มาก → PM2.5 สูงขึ้นจริง (ภาพดาวเทียมยืนยันกับฝุ่น)
+- scatter: outputs/phaseb_20200829_hotspot_count.png + _hotspot_sum_frp.png
+
+### เตรียม CAMS (time-series เม.ย. 2023)
+- ติดตั้ง cdsapi 0.7.7 + สร้าง C:\Users\User\.cdsapirc แล้ว — เหลือผู้ใช้สมัคร ADS แล้ววางคีย์ (UID:APIKEY)
