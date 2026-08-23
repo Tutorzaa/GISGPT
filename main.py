@@ -14,6 +14,7 @@ from geo import analysis as an
 from geo import dashboard as dash
 from geo import hotspots as hs
 from geo import io as geo_io
+from landing import landing_bp
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUTS = os.path.join(BASE_DIR, "outputs")
@@ -28,6 +29,7 @@ if os.path.exists(_env):
             os.environ.setdefault(k.strip(), v.strip())
 
 app = Flask(__name__)
+app.register_blueprint(landing_bp)
 app.secret_key = os.environ.get("SECRET_KEY", "gisgpt-dev-key")
 agent = Agent()
 
@@ -38,7 +40,7 @@ def _ensure_sid():
         session["sid"] = uuid.uuid4().hex
 
 
-@app.route("/")
+@app.route("/chat")
 def index():
     return render_template("index.html")
 

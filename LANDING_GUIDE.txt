@@ -1,0 +1,69 @@
+═══════════════════════════════════════════════════════════
+ คู่มือหน้า LANDING GISGPT — อ่านก่อนแก้ไขครั้งหน้า
+═══════════════════════════════════════════════════════════
+
+โครงสร้างที่เพิ่มเข้ามา
+────────────────────────
+  main.py              → แก้ 3 จุด: import landing_bp, register, เปลี่ยน route "/" เป็น "/chat"
+  landing.py           → Blueprint เสิร์ฟหน้า / จาก frontend/dist (ถ้าไม่มี dist จะ fallback ไป chat)
+  frontend/            → Landing page ทั้งหมด (Vite + React) — งานหลักเดิมไม่ถูกกระทบ
+
+  หน้าเว็บ:  /        = Landing
+            /chat    = หน้าแชทเดิม
+            /dashboard , /hotspots   = เดิม ไม่แตะ
+
+───────────────────────────────────────────────
+ ★ 1) แก้ "ข้อความ" ทั้งหมด → frontend/src/content.js
+───────────────────────────────────────────────
+  ข้อความทุกอย่างบนหน้าเว็บ (tagline, subtitle, การ์ด 6 ใบ,
+  ขั้นตอน, ตัวเลข stats, chips เทคโนโลยี, footer) รวมอยู่ไฟล์เดียว
+  แก้แล้ว save → ต้อง build ใหม่ทุกครั้ง:
+
+      cd frontend
+      npm run build
+
+  ถ้าอยากแก้แบบเห็นผลทันที (live reload) ใช้:
+      npm run dev     ← เปิด http://localhost:5173
+                        (api/chat จะ proxy ไป flask 5000 ให้เอง)
+
+───────────────────────────────────────────────
+ ★ 2) แก้ "สี/ธีม" → frontend/src/App.css
+───────────────────────────────────────────────
+  แก้ที่ :root ด้านบนไฟล์
+      --bg       พื้นหลังหลัก   (ตอนนี้ #0b1020)
+      --bg2      พื้นหลัง section สลับ (#0f1420)
+      --accent   ฟ้า (#4f8cff)  --accent2 เขียว (#34d399)
+      --heading  ฟอนต์หัวข้อ (Kanit)  | body ใช้ Sarabun
+  * gradient ของปุ่ม CTA แยกอยู่ใน App.jsx ที่ props ของ <GlareHover>
+
+───────────────────────────────────────────────
+ ★ 3) ปรับ "ลูกเล่น"
+───────────────────────────────────────────────
+  • โลก 3D (frontend/src/Globe.jsx)
+      state.phi += 0.0022   → ความเร็วหมุน (เพิ่ม = เร็วขึ้น)
+      markers               → พิกัดจุดสีฟ้า (ตอนนี้ กทม. + บุรีรัมย์)
+      baseColor/glowColor   → สีลูกโลก
+  • Aurora (App.jsx บรรทัด <Aurora .../>)
+      colorStops = สี 3 จุด | speed = ความเร็ว | opacity ปรับที่ .aurora-wrap ใน CSS
+  • Scroll animation (AOS)
+      data-aos="fade-up|zoom-in" + data-aos-delay="0..400" (มิลลิวินาที)
+  • การ์ด spotlight สี → prop spotlightColor ของ <SpotlightCard>
+
+───────────────────────────────────────────────
+ วิธีรันเว็บจริง
+───────────────────────────────────────────────
+      python main.py          → http://localhost:5000
+        /                     = Landing (จาก dist ที่ build แล้ว)
+        /chat                 = หน้าแชท
+
+  ⚠ แก้อะไรใน frontend แล้ว ต้อง npm run build ก่อนเสมอ
+     ไม่งั้นหน้าเว็บที่ Flask เสิร์ฟยังเป็นของเก่า
+  ✅ dist/ ถูก push ขึ้น GitHub ด้วย → เครื่องไหน pull มา
+     รัน python main.py ได้เลยโดยไม่ต้องลง Node
+
+───────────────────────────────────────────────
+ ไฟล์ components (react-bits MIT) อยู่ที่ frontend/src/components/
+ ใช้งานจริงตอนนี้: Magnet, GlareHover, SpotlightCard, Aurora
+ (SplitText เก็บไว้แต่ไม่ได้ import — ภาษาไทยมีสระ/วรรณยุกต์
+  การ split ตัวอักษรอาจ render เพี้ยน จึงใช้ AOS fade แทน)
+═══════════════════════════════════════════════
