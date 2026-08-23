@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GISGPT — Geospatial Foundation Model Agent</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="logo">🌍 GISGPT</div>
+      <div class="tagline">Geospatial Foundation Model Agent</div>
+      <div id="status-dot" class="dot"></div>
+    </header>
+
+    <main id="chat">
+      <!-- ข้อความจะถูกเพิ่มโดย chat.js -->
+    </main>
+
+    <footer>
+      <div id="drop-zone" class="drop-zone">
+        <span id="file-hint">📤 ลากไฟล์ GeoTIFF มาวาง หรือคลิกเพื่อเลือก</span>
+        <input type="file" id="file-input" accept=".tif,.tiff,.geotiff" hidden>
+      </div>
+      <div id="input-row">
+        <input type="text" id="message" placeholder="พิมพ์คำสั่ง เช่น 'จำแนก land cover' หรือ 'คำนวณ NDVI' ..." autocomplete="off">
+        <button id="send">ส่ง</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/js/chat.js"></script>
+</body>
+</html>

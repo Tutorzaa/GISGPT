@@ -1,0 +1,10 @@
+flask
+numpy
+rasterio
+opencv-python-headless
+onnxruntime
+matplotlib
+pillow
+folium
+huggingface_hub
+requests

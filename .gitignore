@@ -1,0 +1,10 @@
+# ข้อมูลและโมเดลขนาดใหญ่ — ไม่ push ขึ้น GitHub
+data/raw/
+data/sample/*.tif
+models/
+outputs/
+__pycache__/
+*.pyc
+.env
+.venv/
+.ipynb_checkpoints/
