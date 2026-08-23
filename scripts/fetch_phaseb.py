@@ -72,7 +72,7 @@ def time_series(province, start, end, out_prefix):
     if feature is None:
         print("❌ ไม่พบจังหวัด", province)
         sys.exit(1)
-    bbox = hs.province_bbox(feature, margin=0.0)
+    bbox = hs.province_bbox(feature, margin=1.0)  # ควันเดินทางข้ามจังหวัด — ใช้พื้นที่กว้าง 1°
     lon = (bbox[0] + bbox[2]) / 2
     lat = (bbox[1] + bbox[3]) / 2
     print(f"📍 {pname} — bbox {bbox}, centroid ({lat:.3f}, {lon:.3f})")

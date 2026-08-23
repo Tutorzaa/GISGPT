@@ -158,27 +158,37 @@ def fetch_cams_daily_pm25(lat, lon, start_date, end_date):
         return [], f"need cdsapi+xarray: {e}"
 
     c = cdsapi.Client()
-    r = c.retrieve(
+    os.makedirs(hs.PROC_DIR, exist_ok=True)
+    target = os.path.join(hs.PROC_DIR, "cams_eac4_pm25.nc")
+    c.retrieve(
         "cams-global-reanalysis-eac4",
         {
-            "variable": "particulate_matter_2.5",
+            "variable": "particulate_matter_2.5um",  # ชื่อจริงใน ADS (ตรวจจาก form.json)
             "date": f"{start_date}/{end_date}",
             "time": ["00:00", "06:00", "12:00", "18:00"],
-            "area": [lat + 1, lon - 1, lat - 1, lon + 1],
+            "area": f"{lat + 1}/{lon - 1}/{lat - 1}/{lon + 1}",  # north/west/south/east
             "data_format": "netcdf",
-            "download_format": "unarchived",
         },
+        target,
     )
-    ds = xr.open_dataset(r.location)
-    # ใกล้จุดที่สุด → เฉลี่ยรายวัน (4 ชั่วโมง)
+    ds = xr.open_dataset(target)
+    # หาชื่อตัวแปรใน netCDF (อาจเป็น pm2p5 หรือชื่ออื่น)
+    for cand in ("pm2p5", "particulate_matter_2.5um", "pm2.5"):
+        if cand in ds:
+            v = ds[cand]
+            break
+    else:
+        v = ds[list(ds.data_vars)[0]]
     try:
-        v = ds["pm2p5"].sel(latitude=lat, longitude=lon, method="nearest")
+        v = v.sel(latitude=lat, longitude=lon, method="nearest")
     except Exception:
-        v = ds["pm2p5"].isel(latitude=0, longitude=0)
-    daily = v.resample(time="1D").mean(dim="time")
+        pass
+    time_dim = "valid_time" if "valid_time" in v.dims else "time"  # ECMWF ใช้ valid_time
+    daily = v.resample({time_dim: "1D"}).mean(dim=time_dim)
+    # หน่วย kg/m³ → µg/m³ (คูณ 1e9) แล้วปัดเป็น 1 ทศนิยม
     out = [
-        {"date": str(t)[:10], "pm25": round(float(daily.sel(time=t)), 2)}
-        for t in daily.time.values
+        {"date": str(t)[:10], "pm25": round(float(daily.sel({time_dim: t})) * 1e9, 1)}
+        for t in daily[time_dim].values
     ]
     return out, "cams-eac4"
 
