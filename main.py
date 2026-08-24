@@ -33,12 +33,14 @@ app.register_blueprint(landing_bp)
 app.secret_key = os.environ.get("SECRET_KEY", "gisgpt-dev-key")
 agent = Agent()
 
-# Blueprints แพลตฟอร์ม (Ticket 07 / 09)
+# Blueprints แพลตฟอร์ม (Ticket 07 / 09 / 18)
 from api import correlation_api as api_corr
 from api import layers as api_layers
+from api import query as api_query
 
 app.register_blueprint(api_layers.bp)
 app.register_blueprint(api_corr.bp)
+app.register_blueprint(api_query.bp)
 
 
 @app.before_request

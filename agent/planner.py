@@ -26,6 +26,8 @@ _CHANGE = [
     "สีเขียวลด", "เขียวลด", "เขียวเพิ่ม", "เมืองขยาย", "ขยายตัว",
     "สองช่วง", "2 ช่วง", "ช่วงเวลา", "green change", "พื้นที่สีเขียว",
 ]
+_MET = ["อุณหภูมิ", "สภาพอากาศ", "อากาศ", "weather", "temperature", "ฝน", "ลม", "ความชื้น"]
+_CORR = ["สัมพันธ์", "ตรงไหม", "พิสูจน์", "correlate", "ความสัมพันธ์", "ตรงกัน", "ถูกต้อง", "ยืนยัน"]
 
 
 def _hit(msg, keys):
@@ -41,10 +43,16 @@ class RulePlanner:
             calls.append({"name": "classify", "args": {}})
 
         if _hit(msg, _FIRE):
-            calls.append({"name": "fire_hotspots", "args": {}})
+            calls.append({"name": "satellite_query", "args": {}})
 
         if _hit(msg, _CHANGE):
             calls.append({"name": "green_change", "args": {}})
+
+        if _hit(msg, _MET):
+            calls.append({"name": "met_query", "args": {}})
+
+        if _hit(msg, _CORR):
+            calls.append({"name": "correlation", "args": {}})
 
         if _hit(msg, _INDEX):
             which = "ndvi"

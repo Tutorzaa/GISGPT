@@ -192,6 +192,13 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 14–16 + 18 ✅ — agent tools + /api/query (พิมพ์ไทย → data point + layer + chart)
+- `agent/tools.py`: tools `met_query`, `satellite_query`, `correlation` — คืน data_points/layers/chart (สัญญา Ticket 03)
+- `agent/planner.py`: keyword อุณหภูมิ/อากาศ/weather → met_query, จุดไฟ/hotspot → satellite_query, สัมพันธ์/พิสูจน์ → correlation
+- `api/query.py`: `POST /api/query {text, query?}` → agent วางแผน+รัน → {reply, data_points, layers, chart}
+- `analysis/correlation`: default date_gap_days 3→7 (จับคู่ 2 แหล่งคนละวันใน window เดือนเดียวกัน)
+- **Smoke จริง:** "จุดไฟกับอุณหภูมิสัมพันธ์กันไหม" → hotspot 9 จุด + อุณหภูมิ 20 จุด + **chart r=0.494, n=9** + layers + data_points 29 (ทั้งหมด 42 tests ผ่าน)
+
 ### Ticket 07 + 09 ✅ — API: /api/layers + /api/correlation (ห่วงโซ่พิสูจน์ ใช้ได้จริง)
 - `api/layers.py` — Blueprint `/api/layers` (รายการ layer) + `/api/layers/<name>?bbox[&start&end]` → GeoJSON data points (hotspot / power_t2m / openmeteo_temperature)
 - `api/correlation_api.py` — `POST /api/correlation` {metric_a, metric_b, bbox, start, mode} → ดึงข้อมูลจริง → r/p/n + scatter PNG + summary

@@ -25,7 +25,7 @@ def _d(s) -> _Date | None:
         return None
 
 
-def match_rows(rows_a, rows_b, radius_km: float = 50.0, date_gap_days: int = 3):
+def match_rows(rows_a, rows_b, radius_km: float = 50.0, date_gap_days: int = 7):
     """จับคู่จุด a ↔ b: เลือก b ที่ใกล้สุดในรัศมี และวันใกล้สุดใน date_gap_days.
 
     คืน list[(NormalizedRow_a, NormalizedRow_b)]
@@ -57,7 +57,7 @@ def _vectors(pairs):
     return x, y, pts
 
 
-def cross_sectional(rows_a, rows_b, radius_km=50.0, date_gap_days=3,
+def cross_sectional(rows_a, rows_b, radius_km=50.0, date_gap_days=7,
                     metric_a="a", metric_b="b"):
     pairs = match_rows(rows_a, rows_b, radius_km, date_gap_days)
     if len(pairs) < 3:

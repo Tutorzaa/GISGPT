@@ -19,6 +19,8 @@ from geo import hotspots as hotspots_mod
 from geo import io as geo_io
 from geo import pipeline
 from geo import greenchange as gc
+from analysis import correlation as corr_mod
+from datasources import gistda, nasa_power, open_meteo
 from geo.indices import BASELINE_CLASSES
 from .registry import Tool
 
@@ -168,6 +170,84 @@ def _pick_two_images(ctx):
     return t1, t2
 
 
+# ---------------------------------------------------------------------------
+# Ticket 14–16: tools ที่คืน data_points / layers / chart (ผูกกับ /api/query)
+# ---------------------------------------------------------------------------
+DEFAULT_BBOX = [102.6, 14.4, 103.4, 15.4]  # บุรีรัมย์ (ถ้า query ไม่ระบุ bbox)
+
+
+def _area(ctx):
+    q = ctx.get("query") or {}
+    b = q.get("bbox")
+    if b and len(b) == 4:
+        try:
+            return [float(x) for x in b]
+        except (TypeError, ValueError):
+            pass
+    return DEFAULT_BBOX
+
+
+def _pts(rows):
+    return [{"lat": r.lat, "lon": r.lon, "value": r.value, "metric": r.metric}
+            for r in rows]
+
+
+def t_met_query(ctx, metric="t2m", **kw):
+    """สภาพอากาศ (อุณหภูมิ NASA POWER) เหนือพื้นที่ → data_points + layer."""
+    q = ctx.get("query") or {}
+    bbox = _area(ctx)
+    start = q.get("start", "2023-04-05")
+    rows = nasa_power.grid(bbox, start, start, params=("T2M",), step_km=25.0)
+    if not rows:
+        return {"text": "ไม่พบข้อมูลอุณหภูมิในพื้นที่นี้"}
+    return {
+        "text": f"🌡️ อุณหภูมิ (NASA POWER) {len(rows)} จุด ในพื้นที่ที่เลือก — "
+                f"เฉลี่ย {sum(r.value for r in rows) / len(rows):.1f} °C",
+        "data_points": _pts(rows),
+        "layers": ["power_t2m"],
+    }
+
+
+def t_satellite_query(ctx, metric="hotspot", **kw):
+    """จุดความร้อนจากดาวเทียม (GISTDA) → data_points + layer."""
+    bbox = _area(ctx)
+    rows = gistda.hotspot_rows(bbox)
+    if not rows:
+        return {"text": "ไม่พบจุดความร้อนในพื้นที่นี้"}
+    top = sorted(rows, key=lambda r: r.value, reverse=True)[:3]
+    lines = [f"🔥 จุดความร้อน (GISTDA) {len(rows)} จุด — อันดับสูงสุด:"]
+    lines += [f"  · ({r.lat:.3f}, {r.lon:.3f}) score {r.value}" for r in top]
+    return {
+        "text": "\n".join(lines),
+        "data_points": _pts(rows),
+        "layers": ["hotspot"],
+    }
+
+
+def t_correlation(ctx, metric_a="hotspot_conf", metric_b="power_t2m", **kw):
+    """พิสูจน์ความสัมพันธ์ 2 metric (ดาวเทียม ↔ met) → chart + สรุป."""
+    from api.correlation_api import _rows
+
+    bbox = _area(ctx)
+    q = ctx.get("query") or {}
+    try:
+        a = _rows(metric_a, bbox, q)
+        b = _rows(metric_b, bbox, q)
+    except ValueError as e:
+        return {"text": f"⚠️ {e}"}
+    res = corr_mod.cross_sectional(a, b, radius_km=float(q.get("radius_km", 60)),
+                                   metric_a=metric_a, metric_b=metric_b)
+    if res.get("note"):
+        return {"text": res["note"], "chart": res}
+    verdict = "สัมพันธ์กันชัดเจน" if res["p"] < 0.05 else "ยังไม่พบความสัมพันธ์ชัดเจน"
+    return {
+        "text": (f"📊 {metric_a} ↔ {metric_b}: r={res['r']}, p={res['p']} (n={res['n']}) "
+                 f"→ {verdict} (หมายเหตุ: correlation ≠ causation)"),
+        "chart": res,
+        "layers": ["hotspot"],
+    }
+
+
 def t_green_change(ctx, **kw):
     """Phase C — เปรียบเทียบการเปลี่ยนแปลงพื้นที่สีเขียว/เมือง จากภาพ 2 ช่วงเวลา"""
     pair = _pick_two_images(ctx)
@@ -225,4 +305,7 @@ def register_tools(registry):
     registry.register(Tool("export", "ส่งออกผลลัพธ์เป็น GeoTIFF", ["fmt"], t_export, "io"))
     registry.register(Tool("fire_hotspots", "จุดความร้อน/การเผาไหม้ในจังหวัด (province=ชื่อจังหวัด)", ["province"], t_fire_hotspots, "analysis"))
     registry.register(Tool("green_change", "เปรียบเทียบการเปลี่ยนแปลงพื้นที่สีเขียว/เมือง 2 ช่วงเวลา", [], t_green_change, "analysis"))
+    registry.register(Tool("met_query", "สภาพอากาศ/อุณหภูมิจาก NASA POWER", ["metric"], t_met_query, "analysis"))
+    registry.register(Tool("satellite_query", "จุดความร้อนจากดาวเทียม (GISTDA)", ["metric"], t_satellite_query, "analysis"))
+    registry.register(Tool("correlation", "พิสูจน์ความสัมพันธ์ 2 metric (ดาวเทียม↔สภาพอากาศ)", ["metric_a", "metric_b"], t_correlation, "analysis"))
     registry.register(Tool("help", "แสดงความสามารถของ agent", [], t_help, "info"))
