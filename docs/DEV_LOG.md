@@ -192,6 +192,12 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 04–06 ✅ — data adapters (GISTDA / NASA POWER / Open-Meteo)
+- `datasources/satellite/gistda.py` — hotspot → NormalizedRow (metric=`hotspot_conf`, reuse geo/hotspots) + cache 1 ชม.
+- `datasources/met/nasa_power.py` — อุณหภูมิ/ฝน/ความชื้น → `power_<PARAM>` (รองรับ `start=YYYY-MM-DD` แปลงเป็น YYYYMMDD อัตโนมัติ)
+- `datasources/met/open_meteo.py` — current + hourly range → `openmeteo_<var>`
+- ใช้ `core.cache` + `core.normalize` ร่วมกัน · smoke test จริงผ่าน (Buriram temp, ChiangMai current, Buriram hotspot)
+
 ### Ticket 03 ✅ — agent tool contract (map layer + chart)
 
 - `agent/__init__.py` `_compose` — รวม `data_points/layers/chart` เข้า reply + `agent/tools.py` docstring สัญญาใหม่ + `tests/test_agent_contract.py` (30 tests ผ่าน ✅)
