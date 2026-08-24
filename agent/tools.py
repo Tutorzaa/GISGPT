@@ -1,6 +1,14 @@
 """agent.tools — เครื่องมือ (tools) ที่ agent เรียกใช้
 
-แต่ละฟังก์ชัน: func(ctx, **args) -> dict {text, artifacts, data}
+แต่ละฟังก์ชัน: func(ctx, **args) -> dict
+คีย์ที่ใช้ได้ (Ticket 03):
+- text       : ข้อความตอบกลับ (str)
+- artifacts  : ภาพ/ไฟล์/ลิงก์ (list)        [เดิม]
+- data       : ข้อมูลดิบ เช่น classes       [เดิม]
+- data_points: จุดบนแผนที่ (list)           [ใหม่]
+- layers     : ชื่อชั้นภาพที่อยากให้ show    [ใหม่]
+- chart      : ข้อมูลกราฟ correlation       [ใหม่]
+
 ctx = หน่วยความจำของ session (ดู agent/memory.py)
 """
 import json

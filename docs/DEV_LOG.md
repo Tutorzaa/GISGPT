@@ -192,6 +192,10 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 03 ✅ — agent tool contract (map layer + chart)
+
+- `agent/__init__.py` `_compose` — รวม `data_points/layers/chart` เข้า reply + `agent/tools.py` docstring สัญญาใหม่ + `tests/test_agent_contract.py` (30 tests ผ่าน ✅)
+
 ### Ticket 02 ✅ — geometry utils
 
 - `core/geometry.py` — haversine/bbox_center/grid/point-in-polygon/buffer + `tests/test_geometry.py` (26 tests ผ่าน ✅)

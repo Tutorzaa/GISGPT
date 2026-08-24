@@ -50,12 +50,17 @@ class Agent:
 
     def _compose(self, results, ctx):
         texts, artifacts, legend = [], [], None
+        data_points, layers, chart = [], [], []
         for r in results:
             if not r:
                 continue
             if r.get("text"):
                 texts.append(r["text"])
             artifacts.extend(r.get("artifacts") or [])
+            data_points.extend(r.get("data_points") or [])
+            layers.extend(r.get("layers") or [])
+            if r.get("chart"):
+                chart.append(r["chart"])
             d = r.get("data")
             if d and d.get("classes"):
                 legend = [
@@ -64,4 +69,12 @@ class Agent:
                 ]
         reply = "\n\n".join(texts) or "ไม่เข้าใจคำสั่ง — ลองถาม 'ช่วยด้วย' ดู"
         ctx["history"].append({"role": "assistant", "text": reply})
-        return {"reply": reply, "artifacts": artifacts, "legend": legend}
+        return {
+            "reply": reply,
+            "artifacts": artifacts,
+            "legend": legend,
+            # Ticket 03 — ส่วนที่ frontend ใช้วาดแผนที่/กราฟ (ว่างได้ถ้า tool ไม่มี)
+            "data_points": data_points,
+            "layers": layers,
+            "chart": chart,
+        }
