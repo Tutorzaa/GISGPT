@@ -144,3 +144,26 @@
 - FIRMS SP ดีเลย์ ~7-10 วัน → ข้อมูลสดต้องใช้ NRT (TODO)
 - reference ใช้ MapLibre+deck.gl+ECharts; prototype ใช้ Leaflet+ECharts (เบากว่า)
 - เขียน `docs/DASHBOARD.md` — วิธีทำ/กระบวนการ/สถาปัตยกรรม/roadmap
+
+## 2026-08-24 (รอบ 8) — Phase C: การเปลี่ยนแปลงพื้นที่สีเขียว/เมือง 📗🟤
+
+### สร้าง (ต่อตาม BURN_MONITORING_PLAN Phase C)
+- `geo/greenchange.py` — engine เปรียบเทียบ 2 ช่วงเวลา (ฉากเดียวกัน): คำนวณ ΔNDVI (เขียว) + ΔNDBI (เมือง) รายพิกเซล → 5 คลาส
+  (0 ไม่เปลี่ยน / 1 เขียวเพิ่ม / 2 เขียวลด / 3 เมืองขยาย / 4 เมืองลด) + สถิติพื้นที่ (ha/km²) + ผลสุทธิ
+  - 🔑 แก้การชนกัน: เกณฑ์เมืองต้อง**ลิ่มด้วยค่า NDBI สัมบูรณ์** (NDBI₂ สูง=เป็นตึกจริง) เพื่อแยก "โล่ง→กลับเขียว" (ΔNDBI ลดด้วยเช่นกัน) ออกจาก "เมืองลด"
+- `scripts/make_change_test_tiff.py` — สร้างภาพจำลอง t1/t2 256×256 (4 โซนเปลี่ยนชัดเจน + น้ำ/เมือง/โล่ง)
+- `scripts/fetch_stac_sentinel2.py` — ค้นหา/จัดอันดับ Sentinel-2 L2A ผ่าน Copernicus STAC (metadata ฟรี ไม่ต้อง login)
+  + โหลด 6 แบนด์ [B02,B03,B04,B08,B11,B12] = Blue..SWIR2 (ตรง geo.indices) พร้อม resample 20ม.(B11/B12)→10ม. — ต้องมี COPERNICUS_USER/PASSWORD ใน .env
+- agent tool `green_change` + planner keyword (เปรียบเทียบ/เปลี่ยนแปลง/เมืองขยาย/สองช่วง/...) — รู้เมื่อมีภาพ 2 ภาพใน session
+- `main.py`: route `POST /api/greenchange` (ส่ง t1/t2 ไฟล์) + เก็บ `session["images"]` ย้อนหลัง 12 ภาพ
+
+### ทดสอบผ่าน
+- engine จำลอง: ทั้ง 5 คลาส**ตรงเป๊ะ**ตามโซนที่ตั้ง (c0 57136 / c1 2400 / c2 2000 / c3 2500 / c4 1500 px) + net_green/net_built ถูก ✅
+- `fetch_stac_sentinel2.py --search-only` (บุรีรัมย์ bbox, มี.ค./เม.ย.2023) ← หา scene ไร้เมฆจริง (0% / 7.45% cloud) ✅
+- Flask test client: อัปโหลด 2 ภาพ → แชท "เปรียบเทียบ..." → สถิติ 5 คลาส + แผนที่ diff (artifact) ✅ · `/api/greenchange` POST → HTTP 200 + stats ✅
+
+### หมายเหตุ/ข้อจำกัด
+- ต้องใช้ภาพตรวจภูมิ (co-registered) ขนาดเท่ากัน — สคริปต์ STAC จะ handling resample ให้แล้ว
+- แบนด์สำหรับ NDVI/NDBI = [B02,B03,B04,B08,B11,B12] (มี NIR/SWIR) — **ต่างจาก** Prithvi (B02–B07 RedEdge)
+- โหลดแบนด์จริงยังไม่ทดสอบ (ต้องมีบัญชี Copernicus) — ค้นหา/จัดอันดับทำงานแล้ว
+- (TODO) เชื่อมกับ Phase A: นับ hotspot ในโซนที่เขียวลด

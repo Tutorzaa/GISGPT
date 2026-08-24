@@ -30,10 +30,13 @@ GISGPT/
 │   ├── indices.py           — NDVI / NDWI / NDBI + ตัวจำแนก baseline
 │   ├── landcover.py         — รันโมเดล ONNX (Prithvi head) บน CPU
 │   ├── pipeline.py          — รวมขั้นตอนวิเคราะห์ให้ agent เรียกใช้
+│   ├── greenchange.py       — 🆕 เปรียบเทียบ 2 ช่วงเวลา (Phase C: เขียว/เมืองเปลี่ยน)
 │   └── visualize.py         — ระบายสี class map, สถิติพื้นที่, PNG
 ├── scripts/
 │   ├── finetune.py          — Fine-tune Prithvi-EO-2.0-300M → ONNX → push HF
 │   ├── make_test_tiff.py    — สร้างภาพจำลองสำหรับเทสต์
+│   ├── make_change_test_tiff.py — 🆕 สร้างภาพจำลอง t1/t2 สำหรับเทสต์ Phase C
+│   ├── fetch_stac_sentinel2.py — 🆕 ค้นหา/โหลด Sentinel-2 L2A จาก Copernicus STAC (Phase C)
 │   └── fetch_sample_data.py — ดาวน์โหลดภาพตัวอย่าง (best-effort)
 ├── notebooks/
 │   ├── 01-intro-satellite-analysis.ipynb   ← learning path เดิม
@@ -167,7 +170,8 @@ output: (1, num_classes, 224, 224) logits ต่อพิกเซล (semantic 
 
 - [ ] **Phase A** แผนที่ hotspot บุรีรัมย์ + ขอบเขตจังหวัด + จัดอันดับ FRP (GISTDA + NASA FIRMS)
 - [ ] **Phase B** ยืนยันข้ามข้อมูล: hotspot ↔ ฝุ่น/อุณหภูมิ GISTDA (correlation)
-- [ ] **Phase C** การเปลี่ยนแปลงพื้นที่สีเขียว / เมืองขยาย (Sentinel-2 2 ช่วงเวลา)
+- [🆕] **Phase C** การเปลี่ยนแปลงพื้นที่สีเขียว/เมือง (Sentinel-2 2 ช่วงเวลา) — **engine + agent tool + STAC fetch ทำแล้ว** (รอบ 8) เหลือใช้ข้อมูลจริง
+  `geo/greenchange.py` · แชท: อัปโหลดภาพ 2 ช่วงแล้วถาม "เปรียบเทียบ" หรือ `POST /api/greenchange` · ดึงภาพจริง: `scripts/fetch_stac_sentinel2.py` (ต้องมี COPERNICUS_USER/PASSWORD)
 - [ ] **Phase D** เลือกพื้นที่จากแผนที่ (ROI) + ผูกกับแชท agent + deploy HF Spaces
 - [ ] ดึงข้อมูล Sentinel-2 ผ่าน **Copernicus STAC API** — สั่งแชทเป็นพื้นที่/พิกัดได้
 - [ ] Fine-tune Prithvi จริงบน Colab → ใช้โมเดล land cover จริงในแอป

@@ -21,6 +21,11 @@ _EXPLAIN = ["อธิบาย", "คลาส", "สี", "legend", "คือ
 _LIST = ["ภาพ", "ไฟล์", "upload", "มีอะไร", "แสดง", "รูป"]
 _EXPORT = ["export", "ดาวน์โหลด", "save", "บันทึก", "geotiff", "tif", "ส่งออก"]
 _HELP = ["ช่วย", "help", "ทำอะไร", "ความสามารถ", "อะไรได้บ้าง", "วิธีใช้", "ใช้ยังไง"]
+_CHANGE = [
+    "เปรียบเทียบ", "เปลี่ยนแปลง", "เปลี่ยน", "diff", "change", "compare",
+    "สีเขียวลด", "เขียวลด", "เขียวเพิ่ม", "เมืองขยาย", "ขยายตัว",
+    "สองช่วง", "2 ช่วง", "ช่วงเวลา", "green change", "พื้นที่สีเขียว",
+]
 
 
 def _hit(msg, keys):
@@ -37,6 +42,9 @@ class RulePlanner:
 
         if _hit(msg, _FIRE):
             calls.append({"name": "fire_hotspots", "args": {}})
+
+        if _hit(msg, _CHANGE):
+            calls.append({"name": "green_change", "args": {}})
 
         if _hit(msg, _INDEX):
             which = "ndvi"
@@ -60,4 +68,7 @@ class RulePlanner:
 
         if not calls:
             calls.append({"name": "help", "args": {}})
+        # คำสั่งเปรียบเทียบ (Phase C) ให้ตอบเฉพาะการเปลี่ยนแปลง ไม่ปนกับ stats/explain
+        if any(c["name"] == "green_change" for c in calls):
+            calls = [c for c in calls if c["name"] == "green_change"]
         return calls

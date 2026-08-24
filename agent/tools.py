@@ -10,6 +10,7 @@ import uuid
 from geo import hotspots as hotspots_mod
 from geo import io as geo_io
 from geo import pipeline
+from geo import greenchange as gc
 from geo.indices import BASELINE_CLASSES
 from .registry import Tool
 
@@ -117,6 +118,8 @@ def t_help(ctx, **kw):
         "- **'สถิติพื้นที่'** — พื้นที่แต่ละคลาส (เฮกตาร์/ตร.กม.)",
         "- **'อธิบายคลาส'** — ความหมายของแต่ละประเภท",
         "- **'export'** — ส่งออกผลลัพธ์เป็น GeoTIFF",
+        "- อัปโหลดภาพดาวเทียม **2 ช่วงเวลา** (ฉากเดียวกัน) แล้วถาม **'เปรียบเทียบ'** — "
+        "ดูพื้นที่สีเขียวเพิ่ม/ลด และเมืองขยายตัว (Phase C)",
         "",
         "ตอนนี้รันด้วย baseline (NDVI/NDWI/NDBI) — เมื่อเทรน Prithvi เสร็จจาก Colab จะสลับใช้โมเดล GFM อัตโนมัติ",
     ]
@@ -146,6 +149,65 @@ def t_fire_hotspots(ctx, province="บุรีรัมย์", **kw):
     }
 
 
+def _pick_two_images(ctx):
+    """คืน 2 ภาพล่าสุด (t1 = เก่า, t2 = ใหม่) จากภาพที่อัปโหลดใน session."""
+    imgs = ctx.get("images") or []
+    if len(imgs) < 2:
+        return None
+    t1, t2 = imgs[-2], imgs[-1]
+    if t1.get("path") == t2.get("path"):
+        return None
+    return t1, t2
+
+
+def t_green_change(ctx, **kw):
+    """Phase C — เปรียบเทียบการเปลี่ยนแปลงพื้นที่สีเขียว/เมือง จากภาพ 2 ช่วงเวลา"""
+    pair = _pick_two_images(ctx)
+    if pair is None:
+        return {
+            "text": "ต้องอัปโหลด **ภาพดาวเทียม 2 ช่วงเวลา** (ฉากเดียวกัน) ก่อน ถึงจะเปรียบเทียบได้\n"
+                    "เช่น ภาพ มี.ค. กับ เม.ย. — อัปโหลดภาพแรก แล้วอัปโหลดภาพที่สอง แล้วถาม 'เปรียบเทียบ'"
+        }
+    t1, t2 = pair
+    base_id = f"{t1.get('file_id') or 'x'}__{t2.get('file_id') or 'x'}"
+    try:
+        res = gc.analyze(t1["path"], t2["path"], out_id=base_id)
+    except ValueError as e:
+        return {"text": f"⚠️ {e}"}
+
+    lines = [
+        f"🟢↔🟤 เปรียบเทียบ {t1['name']} (t1) กับ {t2['name']} (t2):",
+        "",
+    ]
+    for s in res["stats"]:
+        if "area_ha" in s:
+            lines.append(
+                f"  - **{s['label_th']}**: {s['pct']}% · {s['area_ha']:,.1f} เฮกตาร์ "
+                f"({s['area_km2']} ตร.กม.)"
+            )
+        else:
+            lines.append(f"  - **{s['label_th']}**: {s['pct']}% ({s['pixels']:,} พิกเซล)")
+    ng, nb = res["net_green"], res["net_built"]
+    if ng and nb:
+        lines += [
+            "",
+            f"📉 สีเขียว **สุทธิ**: {ng['net_ha']:+,.1f} เฮกตาร์ "
+            f"(เพิ่ม {ng['gain_ha']:,.1f} / ลด {ng['loss_ha']:,.1f})",
+            f"🏙️ สิ่งก่อสร้าง **สุทธิ**: {nb['net_ha']:+,.1f} เฮกตาร์ "
+            f"(เพิ่ม {nb['gain_ha']:,.1f} / ลด {nb['loss_ha']:,.1f})",
+            f"threshold: ΔNDVI>{res['thresholds']['ndvi']:.2f}, ΔNDBI>{res['thresholds']['ndbi']:.2f}",
+        ]
+    ctx["last"] = res
+    return {
+        "text": "\n".join(lines),
+        "artifacts": [{
+            "type": "image", "url": res["png"],
+            "caption": "แผนที่การเปลี่ยนแปลง (เขียว=เพิ่ม, แดง=ลด, น้ำตาล=เมืองขยาย)",
+        }],
+        "data": res,
+    }
+
+
 def register_tools(registry):
     registry.register(Tool("classify", "จำแนก land cover จากภาพดาวเทียม", [], t_classify, "analysis"))
     registry.register(Tool("index", "คำนวณดัชนีสเปกตรัม (which=ndvi/ndwi/ndbi)", ["which"], t_index, "analysis"))
@@ -154,4 +216,5 @@ def register_tools(registry):
     registry.register(Tool("list_images", "แสดงภาพที่อัปโหลด", [], t_list_images, "info"))
     registry.register(Tool("export", "ส่งออกผลลัพธ์เป็น GeoTIFF", ["fmt"], t_export, "io"))
     registry.register(Tool("fire_hotspots", "จุดความร้อน/การเผาไหม้ในจังหวัด (province=ชื่อจังหวัด)", ["province"], t_fire_hotspots, "analysis"))
+    registry.register(Tool("green_change", "เปรียบเทียบการเปลี่ยนแปลงพื้นที่สีเขียว/เมือง 2 ช่วงเวลา", [], t_green_change, "analysis"))
     registry.register(Tool("help", "แสดงความสามารถของ agent", [], t_help, "info"))

@@ -51,8 +51,13 @@ def upload():
     if f is None or not f.filename:
         return jsonify(error="ไม่พบไฟล์"), 400
     info = geo_io.save_upload(f)
-    mem.get(session["sid"])["current"] = info
-    mem.get(session["sid"]).pop("last", None)  # ภาพใหม่ → ผลเก่าไม่ถูกต้อง
+    sid = session["sid"]
+    img_list = mem.get(sid).setdefault("images", [])
+    img_list.append(info)
+    if len(img_list) > 12:          # เก็บภาพย้อนหลังไว้ไม่เกิน 12 เพื่อเทียบ 2 ช่วงเวลา
+        del img_list[: len(img_list) - 12]
+    mem.get(sid)["current"] = info
+    mem.get(sid).pop("last", None)  # ภาพใหม่ → ผลเก่าไม่ถูกต้อง
     return jsonify(info)
 
 
@@ -127,6 +132,34 @@ def api_dashboard():
     if "error" in data:
         return jsonify(data), 404
     return jsonify(data)
+
+
+@app.route("/api/greenchange", methods=["POST"])
+def api_greenchange():
+    """Phase C — รับภาพ 2 ช่วงเวลา (t1, t2) → ผลการเปลี่ยนแปลงพื้นที่สีเขียว/เมือง.
+
+    ใช้ multipart/form-data:  field 't1' และ 't2' (GeoTIFF ฉากเดียวกัน)
+    """
+    import geo.greenchange as gc
+
+    f1 = request.files.get("t1")
+    f2 = request.files.get("t2")
+    if f1 is None or f2 is None:
+        return jsonify(error="ต้องอัปโหลดไฟล์ 2 ไฟล์: field 't1' และ 't2'"), 400
+    info1 = geo_io.save_upload(f1)   # ใช้ fid เพื่อไม่ซ้ำกับแชท session
+    info2 = geo_io.save_upload(f2)
+    try:
+        res = gc.analyze(info1["path"], info2["path"], out_id=f"{info1['file_id']}__{info2['file_id']}")
+    except ValueError as e:
+        return jsonify(error=str(e)), 400
+    return jsonify({
+        "stats": res["stats"],
+        "net_green": res["net_green"],
+        "net_built": res["net_built"],
+        "thresholds": res["thresholds"],
+        "png": res["png"],
+        "image": "/outputs/" + os.path.basename(res["png"]),
+    })
 
 
 @app.route("/outputs/<path:name>")
