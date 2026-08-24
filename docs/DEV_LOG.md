@@ -192,6 +192,10 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### i18n — แพลตฟอร์มใช้ภาษาอังกฤษเป็นหลัก
+- แปลง user-facing ของ platform (agent tools met/satellite/correlation, t_help, API error/summary/note) เป็น **English-primary**
+- แชทรองรับทั้งไทย/อังกฤษ (planner keyword ทั้ง 2 ภาษา) แต่ข้อความตอบกลับเป็นอังกฤษ
+
 ### Ticket 14–16 + 18 ✅ — agent tools + /api/query (พิมพ์ไทย → data point + layer + chart)
 - `agent/tools.py`: tools `met_query`, `satellite_query`, `correlation` — คืน data_points/layers/chart (สัญญา Ticket 03)
 - `agent/planner.py`: keyword อุณหภูมิ/อากาศ/weather → met_query, จุดไฟ/hotspot → satellite_query, สัมพันธ์/พิสูจน์ → correlation

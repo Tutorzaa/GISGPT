@@ -62,7 +62,7 @@ def cross_sectional(rows_a, rows_b, radius_km=50.0, date_gap_days=7,
     pairs = match_rows(rows_a, rows_b, radius_km, date_gap_days)
     if len(pairs) < 3:
         return _empty("cross", len(pairs), metric_a, metric_b,
-                      note="จับคู่ได้น้อยเกินไป (n<3) รัศมี/ช่วงวันแน่นเกิน")
+                      note="Too few matched pairs (n<3) — radius/date window too tight")
     x, y, pts = _vectors(pairs)
     r, p, n = _ga.pearson(x, y)
     return {"mode": "cross", "n": n, "r": r, "p": p, "points": pts,
@@ -76,7 +76,7 @@ def time_series(rows_a, rows_b, metric_a="a", metric_b="b"):
     common = sorted(set(a) & set(b))
     if len(common) < 3:
         return _empty("time", len(common), metric_a, metric_b,
-                      note="วันร่วมน้อยเกินไป (n<3)")
+                      note="Too few common dates (n<3)")
     x = [a[k] for k in common]
     y = [b[k] for k in common]
     r, p, n = _ga.pearson(x, y)

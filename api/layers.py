@@ -70,9 +70,9 @@ def layers_list():
 def layer_data(name):
     bbox = _bbox(request.args)
     if bbox is None:
-        return jsonify(error="ต้องระบุ lon_min, lat_min, lon_max, lat_max"), 400
+        return jsonify(error="Required: lon_min, lat_min, lon_max, lat_max"), 400
     fn = FETCHERS.get(name)
     if fn is None:
-        return jsonify(error=f"ไม่พบ layer '{name}', ดู /api/layers"), 404
+        return jsonify(error=f"Unknown layer '{name}', see /api/layers"), 404
     rows = fn(bbox, request.args)
     return jsonify(to_geojson(rows))

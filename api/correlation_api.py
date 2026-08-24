@@ -90,8 +90,8 @@ def correlate():
 def _summarize(res, metric_a, metric_b):
     r, p, n = res.get("r"), res.get("p"), res.get("n")
     if n < 3:
-        return f"ข้อมูลน้อยเกินไป (n={n}) — ลองขยาย bbox/ช่วงเวลา หรือเพิ่มรัศมี"
-    sig = "มีนัยสำคัญ" if p < 0.05 else "ไม่ชัดเจน"
-    direction = "สัมพันธ์เชิงบวก" if r > 0.05 else ("สัมพันธ์เชิงลบ" if r < -0.05 else "แทบไม่สัมพันธ์")
+        return f"Too few matched points (n={n}) — try a wider bbox/time range or larger radius"
+    sig = "significant" if p < 0.05 else "not clearly significant"
+    direction = ("positive" if r > 0.05 else ("negative" if r < -0.05 else "near-zero"))
     return (f"{metric_a} ↔ {metric_b}: r={r}, p={p} (n={n}) → "
-            f"{direction}, {sig} (หมายเหตุ: correlation ≠ causation)")
+            f"{direction}, {sig} (note: correlation ≠ causation)")

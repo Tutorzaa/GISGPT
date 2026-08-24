@@ -22,12 +22,12 @@ def query():
     d = request.get_json(silent=True) or {}
     text = (d.get("text") or "").strip()
     if not text:
-        return jsonify(error="ต้องระบุ 'text' ข้อความที่ต้องการ"), 400
+        return jsonify(error="Field 'text' is required"), 400
     extras = d.get("query") or {}
     ctx = memory.get("api_query_session")
     ctx["query"] = extras
     try:
         out = _agent.handle("api_query_session", text)
-    except Exception as e:  # ไม่ให้ query พังทั้ง API
-        return jsonify(error=f"เกิดข้อผิดพลาด: {e}"), 500
+    except Exception as e:  # don't let one query break the API
+        return jsonify(error=f"Internal error: {e}"), 500
     return jsonify(out)

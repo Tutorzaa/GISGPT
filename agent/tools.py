@@ -120,18 +120,16 @@ def t_export(ctx, fmt="geotiff", **kw):
 
 def t_help(ctx, **kw):
     lines = [
-        "สวัสดี! ผม GISGPT — agent ด้าน GIS 🌍",
+        "Hello! I'm GISGPT — Geospatial Foundation Model Agent 🌍",
         "",
-        "ลองสั่งงานแบบนี้ได้เลย:",
-        "- อัปโหลดภาพดาวเทียม (GeoTIFF) แล้วถาม **'จำแนก land cover'**",
-        "- **'คำนวณ NDVI' / 'NDWI' / 'NDBI'** — ดัชนีสเปกตรัม",
-        "- **'สถิติพื้นที่'** — พื้นที่แต่ละคลาส (เฮกตาร์/ตร.กม.)",
-        "- **'อธิบายคลาส'** — ความหมายของแต่ละประเภท",
-        "- **'export'** — ส่งออกผลลัพธ์เป็น GeoTIFF",
-        "- อัปโหลดภาพดาวเทียม **2 ช่วงเวลา** (ฉากเดียวกัน) แล้วถาม **'เปรียบเทียบ'** — "
-        "ดูพื้นที่สีเขียวเพิ่ม/ลด และเมืองขยายตัว (Phase C)",
+        "Natural-language examples (Thai & English both work):",
+        "- 'Show hotspots in Buriram' / 'จุดไฟในบุรีรัมย์' → satellite hotspots on map",
+        "- 'Show temperature in this area' / 'อุณหภูมิพื้นที่นี้' → weather data points",
+        "- 'Are hotspots correlated with temperature?' / 'จุดไฟกับอุณหภูมิสัมพันธ์กันไหม' → correlation chart",
+        "- 'Classify land cover' / 'จำแนก land cover' → pixel land-cover layer",
+        "- 'Compare 2 time periods' / 'เปรียบเทียบ 2 ช่วง' → change detection",
         "",
-        "ตอนนี้รันด้วย baseline (NDVI/NDWI/NDBI) — เมื่อเทรน Prithvi เสร็จจาก Colab จะสลับใช้โมเดล GFM อัตโนมัติ",
+        "For image analysis you can also upload a GeoTIFF (Sentinel-2/Landsat).",
     ]
     return {"text": "\n".join(lines)}
 
@@ -193,29 +191,30 @@ def _pts(rows):
 
 
 def t_met_query(ctx, metric="t2m", **kw):
-    """สภาพอากาศ (อุณหภูมิ NASA POWER) เหนือพื้นที่ → data_points + layer."""
+    """Weather (NASA POWER temperature) over area → data_points + layer."""
     q = ctx.get("query") or {}
     bbox = _area(ctx)
     start = q.get("start", "2023-04-05")
     rows = nasa_power.grid(bbox, start, start, params=("T2M",), step_km=25.0)
     if not rows:
-        return {"text": "ไม่พบข้อมูลอุณหภูมิในพื้นที่นี้"}
+        return {"text": "No temperature data in this area."}
+    avg = sum(r.value for r in rows) / len(rows)
     return {
-        "text": f"🌡️ อุณหภูมิ (NASA POWER) {len(rows)} จุด ในพื้นที่ที่เลือก — "
-                f"เฉลี่ย {sum(r.value for r in rows) / len(rows):.1f} °C",
+        "text": f"🌡️ Temperature (NASA POWER): {len(rows)} points in selected area — "
+                f"avg {avg:.1f} °C",
         "data_points": _pts(rows),
         "layers": ["power_t2m"],
     }
 
 
 def t_satellite_query(ctx, metric="hotspot", **kw):
-    """จุดความร้อนจากดาวเทียม (GISTDA) → data_points + layer."""
+    """Satellite hotspots (GISTDA) → data_points + layer."""
     bbox = _area(ctx)
     rows = gistda.hotspot_rows(bbox)
     if not rows:
-        return {"text": "ไม่พบจุดความร้อนในพื้นที่นี้"}
+        return {"text": "No hotspots in this area."}
     top = sorted(rows, key=lambda r: r.value, reverse=True)[:3]
-    lines = [f"🔥 จุดความร้อน (GISTDA) {len(rows)} จุด — อันดับสูงสุด:"]
+    lines = [f"🔥 Hotspots (GISTDA): {len(rows)} points — highest intensity:"]
     lines += [f"  · ({r.lat:.3f}, {r.lon:.3f}) score {r.value}" for r in top]
     return {
         "text": "\n".join(lines),
@@ -225,7 +224,7 @@ def t_satellite_query(ctx, metric="hotspot", **kw):
 
 
 def t_correlation(ctx, metric_a="hotspot_conf", metric_b="power_t2m", **kw):
-    """พิสูจน์ความสัมพันธ์ 2 metric (ดาวเทียม ↔ met) → chart + สรุป."""
+    """Prove the relationship between 2 metrics (satellite ↔ weather) → chart + text."""
     from api.correlation_api import _rows
 
     bbox = _area(ctx)
@@ -239,10 +238,10 @@ def t_correlation(ctx, metric_a="hotspot_conf", metric_b="power_t2m", **kw):
                                    metric_a=metric_a, metric_b=metric_b)
     if res.get("note"):
         return {"text": res["note"], "chart": res}
-    verdict = "สัมพันธ์กันชัดเจน" if res["p"] < 0.05 else "ยังไม่พบความสัมพันธ์ชัดเจน"
+    verdict = "significant" if res["p"] < 0.05 else "not clearly significant"
     return {
         "text": (f"📊 {metric_a} ↔ {metric_b}: r={res['r']}, p={res['p']} (n={res['n']}) "
-                 f"→ {verdict} (หมายเหตุ: correlation ≠ causation)"),
+                 f"→ {verdict} (note: correlation ≠ causation)"),
         "chart": res,
         "layers": ["hotspot"],
     }
