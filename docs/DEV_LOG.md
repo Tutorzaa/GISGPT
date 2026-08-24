@@ -167,3 +167,20 @@
 - แบนด์สำหรับ NDVI/NDBI = [B02,B03,B04,B08,B11,B12] (มี NIR/SWIR) — **ต่างจาก** Prithvi (B02–B07 RedEdge)
 - โหลดแบนด์จริงยังไม่ทดสอบ (ต้องมีบัญชี Copernicus) — ค้นหา/จัดอันดับทำงานแล้ว
 - (TODO) เชื่อมกับ Phase A: นับ hotspot ในโซนที่เขียวลด
+
+## 2026-08-24 (วางแผนใหญ่ — pivot วิสัยทัศน์แพลตฟอร์ม แยก 27 tasks)
+### ทิศทางใหม่ (จากผู้ใช้)
+- แพลตฟอร์ม **Windy-like** ผสาน **ข้อมูลดาวเทียม + สภาพอากาศ (met)** บนแผนที่ สั่งผ่าน **แชทบอท AI** (Geospatial Foundation Model) → แสดงผลเป็น data point บนแผนที่ + **กราฟ correlation** เพื่อพิสูจน์ผล
+- มุมวิจัย: ใช้ GFM วิเคราะห์/ยืนยันเหตุการณ์เชิงพื้นที่-เวลา, verify ความเข้าใจโมเดล, benchmark spatio-temporal
+- ผู้ใช้ตัดสินใจ: **ยังไม่ทำ UI** — เริ่มจากโครง backend + เอกสารสถาปัตยกรรม/แผนก่อน
+
+### เอกสารที่เขียน
+- `docs/PLATFORM_ARCHITECTURE.md` — สถาปัตยกรรม 4 ชั้น (frontend/agent/analysis/adapters) + normalized row `{lat,lon,time,metric,value,src}` + tech stack + API + แผน P0–P4 + เปิดคำถาม
+- `.scratch/gisgpt-platform/README.md` — แผนผัง dependencies + critical path
+- `.scratch/gisgpt-platform/issues/01–27-*.md` — **27 tasks ย่อย ๆ** แต่ละไฟล์มี What to build / Blocked by / acceptance
+
+### แนวทิศทางที่ลงตัว
+- critical path: 01→02→(04/05/06→08→09) และ 03→(14/15/16)→18→23→27
+- ชิ้นแรกที่เป็น "usable" เร็วสุด: **09 `/api/correlation`** (hotspot↔met) พิสูจน์ห่วงโซ่ด้วย API ตรง
+- ผู้ใช้คนแรก: **18 `/api/query`** (ภาษาไทย → data point + layer + chart)
+- ยังไม่ได้แก้โค้ด function ในรอบนี้ (เป็นงานวางแผน/documentation เท่านั้น)
