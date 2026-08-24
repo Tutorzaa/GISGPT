@@ -184,3 +184,14 @@
 - ชิ้นแรกที่เป็น "usable" เร็วสุด: **09 `/api/correlation`** (hotspot↔met) พิสูจน์ห่วงโซ่ด้วย API ตรง
 - ผู้ใช้คนแรก: **18 `/api/query`** (ภาษาไทย → data point + layer + chart)
 - ยังไม่ได้แก้โค้ด function ในรอบนี้ (เป็นงานวางแผน/documentation เท่านั้น)
+
+## 2026-08-24 (ไล่ทำงานตาม Ticket — start)
+### Ticket 01 ✅ — โครง backend + schema + cache (รากฐาน)
+- `config.py` — โหลด .env + ค่าคงที่ (DATA_RAW/OUTPUTS/CACHE_DIR) ใช้ร่วมกัน
+- `core/normalize.py` — **NormalizedRow** `{lat,lon,time,metric,value,src,meta}` + validate + make/from_dict/to_records + `to_geojson()`
+- `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
+- `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
+
+### หมายเหตุ
+- เริ่มทำตามแผนทิศทาง: 01 (base) → 02 (geometry) → 03 (agent contract) → 04–06 (adapter)
+- เหลือติดตั้ง pytest ใน env dev (ติดแล้วใน .venv)
