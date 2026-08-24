@@ -192,6 +192,12 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 07 + 09 ✅ — API: /api/layers + /api/correlation (ห่วงโซ่พิสูจน์ ใช้ได้จริง)
+- `api/layers.py` — Blueprint `/api/layers` (รายการ layer) + `/api/layers/<name>?bbox[&start&end]` → GeoJSON data points (hotspot / power_t2m / openmeteo_temperature)
+- `api/correlation_api.py` — `POST /api/correlation` {metric_a, metric_b, bbox, start, mode} → ดึงข้อมูลจริง → r/p/n + scatter PNG + summary
+- `analysis/correlation.py` ใช้กับ API · POWER grid ทั่ว bbox (หลายจุด) ให้ cross-sectional มีค่าไม่คงที่
+- smoke จริงผ่าน: layers list 200, hotspot layer 9 points, correlation power_t2m↔hotspot r=0.03 (n=12) — ตรวจ authority ผลจริง honest (ไม่พบความสัมพันธ์ชัดเจน → แสดง pipeline ทำงาน)
+
 ### Ticket 08 ✅ — correlation engine (NormalizedRow)
 - `analysis/correlation.py` — `match_rows` (จับคู่ในรัศมี+วันที่), `cross_sectional`, `time_series`, `render_scatter`
 - reuse `geo.analysis.pearson` (มี fallback ไร้ scipy); ติดตั้ง scipy แล้ว (p-value แม่นขึ้น)
