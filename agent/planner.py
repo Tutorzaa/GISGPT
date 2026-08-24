@@ -28,6 +28,7 @@ _CHANGE = [
 ]
 _MET = ["อุณหภูมิ", "สภาพอากาศ", "อากาศ", "weather", "temperature", "ฝน", "ลม", "ความชื้น"]
 _CORR = ["สัมพันธ์", "ตรงไหม", "พิสูจน์", "correlate", "ความสัมพันธ์", "ตรงกัน", "ถูกต้อง", "ยืนยัน"]
+_ELEV = ["ภูเขา", "ยอดเขา", "ยอด", "อันดับ", "mountain", "peak", "elevation", "สูงสุด", "ดอย", "ความสูง"]
 
 
 def _hit(msg, keys):
@@ -54,6 +55,9 @@ class RulePlanner:
         if _hit(msg, _CORR):
             calls.append({"name": "correlation", "args": {}})
 
+        if _hit(msg, _ELEV):
+            calls.append({"name": "elevation_query", "args": {}})
+
         if _hit(msg, _INDEX):
             which = "ndvi"
             for w in ("ndwi", "ndbi", "ndvi"):
@@ -76,7 +80,9 @@ class RulePlanner:
 
         if not calls:
             calls.append({"name": "help", "args": {}})
-        # คำสั่งเปรียบเทียบ (Phase C) ให้ตอบเฉพาะการเปลี่ยนแปลง ไม่ปนกับ stats/explain
-        if any(c["name"] == "green_change" for c in calls):
-            calls = [c for c in calls if c["name"] == "green_change"]
+        # Intent เฉพาะ (change / elevation) ให้ตอบแบบโฟกัส ไม่ปนกับ stats/explain
+        for solo in ("green_change", "elevation_query"):
+            if any(c["name"] == solo for c in calls):
+                calls = [c for c in calls if c["name"] == solo]
+                break
         return calls

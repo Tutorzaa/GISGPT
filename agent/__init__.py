@@ -43,8 +43,8 @@ class Agent:
                 continue
             try:
                 results.append(tool.func(ctx, **call.get("args", {})))
-            except Exception as e:  # ไม่ให้ tool หนึ่งพังทั้งแชท
-                results.append({"text": f"⚠️ เครื่องมือ '{call['name']}' ผิดพลาด: {e}"})
+            except Exception as e:  # don't let one tool break the whole chat
+                results.append({"text": f"⚠️ Tool '{call['name']}' failed: {e}"})
 
         return self._compose(results, ctx)
 

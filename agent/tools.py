@@ -295,6 +295,30 @@ def t_green_change(ctx, **kw):
     }
 
 
+def t_elevation(ctx, **kw):
+    """Mountain peaks (SRTM elevation) in the selected area, ranked."""
+    from analysis.peaks import find_peaks
+    from datasources.terrain import elevation as elev
+
+    bbox = _area(ctx)
+    step = float((ctx.get("query") or {}).get("step_km", 20))
+    rows = elev.grid(bbox, step_km=step)
+    if not rows:
+        return {"text": "No elevation data in this area."}
+    peaks = find_peaks(rows, min_elev=400.0, top_n=8)
+    if not peaks:
+        return {"text": "No significant peaks found in this area."}
+    lines = [f"🏔️ Mountain peaks in area (top {len(peaks)}):"]
+    lines += [f"  #{i+1} · ({p['lat']:.3f}, {p['lon']:.3f}) — {p['elev']:.0f} m"
+              for i, p in enumerate(peaks)]
+    return {
+        "text": "\n".join(lines),
+        "data_points": [{"lat": p["lat"], "lon": p["lon"], "value": p["elev"],
+                         "metric": "elevation_m"} for p in peaks],
+        "layers": ["elevation"],
+    }
+
+
 def register_tools(registry):
     registry.register(Tool("classify", "จำแนก land cover จากภาพดาวเทียม", [], t_classify, "analysis"))
     registry.register(Tool("index", "คำนวณดัชนีสเปกตรัม (which=ndvi/ndwi/ndbi)", ["which"], t_index, "analysis"))
@@ -307,4 +331,5 @@ def register_tools(registry):
     registry.register(Tool("met_query", "สภาพอากาศ/อุณหภูมิจาก NASA POWER", ["metric"], t_met_query, "analysis"))
     registry.register(Tool("satellite_query", "จุดความร้อนจากดาวเทียม (GISTDA)", ["metric"], t_satellite_query, "analysis"))
     registry.register(Tool("correlation", "พิสูจน์ความสัมพันธ์ 2 metric (ดาวเทียม↔สภาพอากาศ)", ["metric_a", "metric_b"], t_correlation, "analysis"))
+    registry.register(Tool("elevation_query", "อันดับยอดเขาจากความสูง (SRTM)", [], t_elevation, "analysis"))
     registry.register(Tool("help", "แสดงความสามารถของ agent", [], t_help, "info"))

@@ -192,6 +192,12 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 12 ✅ — Elevation / Mountain ranking (SRTM)
+- `datasources/terrain/elevation.py` — SRTM ผ่าน OpenTopoData (ฟรี) เป็น NormalizedRow(เมตร) + cache 30วัน + retry/rate-limit
+- `analysis/peaks.py` — หาจุดยอดสูงสุด + จัดอันดับ
+- agent tool `elevation_query` + planner keyword (ภูเขา/ยอด/mountain/peak) + layer elevation
+- **Smoke จริง:** พื้นที่ดอยอินทนนท์ → เจอยอดสูงสุด 1 จุด (18.804,98.584) 1279m + data_points ([ข้อจำกัด: step 15km อาจพลาดยอดจริง — ปรับละเอียดขึ้นได้])
+
 ### Ticket 20–22 ✅ — Benchmark spatio-temporal analysis (วิจัย)
 - `benchmark/tasks.py` — 4 โจทย์ ground-truth (recover r / noise / time-series trend / hotspot จริง)
 - `benchmark/metrics.py` — rmse/r2/accuracy · `runner.run_tasks()`
