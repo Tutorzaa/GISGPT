@@ -192,6 +192,10 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 08 ✅ — correlation engine (NormalizedRow)
+- `analysis/correlation.py` — `match_rows` (จับคู่ในรัศมี+วันที่), `cross_sectional`, `time_series`, `render_scatter`
+- reuse `geo.analysis.pearson` (มี fallback ไร้ scipy); ติดตั้ง scipy แล้ว (p-value แม่นขึ้น)
+
 ### Ticket 04–06 ✅ — data adapters (GISTDA / NASA POWER / Open-Meteo)
 - `datasources/satellite/gistda.py` — hotspot → NormalizedRow (metric=`hotspot_conf`, reuse geo/hotspots) + cache 1 ชม.
 - `datasources/met/nasa_power.py` — อุณหภูมิ/ฝน/ความชื้น → `power_<PARAM>` (รองรับ `start=YYYY-MM-DD` แปลงเป็น YYYYMMDD อัตโนมัติ)
