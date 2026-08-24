@@ -192,6 +192,10 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 02 ✅ — geometry utils
+
+- `core/geometry.py` — haversine/bbox_center/grid/point-in-polygon/buffer + `tests/test_geometry.py` (26 tests ผ่าน ✅)
+
 ### หมายเหตุ
 - เริ่มทำตามแผนทิศทาง: 01 (base) → 02 (geometry) → 03 (agent contract) → 04–06 (adapter)
 - เหลือติดตั้ง pytest ใน env dev (ติดแล้วใน .venv)
