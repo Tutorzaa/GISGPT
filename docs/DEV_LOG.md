@@ -192,6 +192,13 @@
 - `core/cache.py` — `JSONCache` (TTL, key SHA1 ปลอดภัย, get/set/delete/clear)
 - `tests/test_core.py` — **19 tests ผ่าน** ✅ (validate, roundtrip, geojson, cache ttl/delete/clear)
 
+### Ticket 20–22 ✅ — Benchmark spatio-temporal analysis (วิจัย)
+- `benchmark/tasks.py` — 4 โจทย์ ground-truth (recover r / noise / time-series trend / hotspot จริง)
+- `benchmark/metrics.py` — rmse/r2/accuracy · `runner.run_tasks()`
+- `api/benchmark.py` — `GET /api/benchmark`
+- `docs/BENCHMARK_REPORT.md` — รายงานผลจริง: **ผ่าน 4/4** (r 0.98/0.99/0.997, hotspot จริง n=9)
+- 47 tests ผ่าน
+
 ### i18n — แพลตฟอร์มใช้ภาษาอังกฤษเป็นหลัก
 - แปลง user-facing ของ platform (agent tools met/satellite/correlation, t_help, API error/summary/note) เป็น **English-primary**
 - แชทรองรับทั้งไทย/อังกฤษ (planner keyword ทั้ง 2 ภาษา) แต่ข้อความตอบกลับเป็นอังกฤษ

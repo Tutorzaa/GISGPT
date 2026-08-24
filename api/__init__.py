@@ -2,3 +2,4 @@
 from . import layers  # noqa: F401
 from . import correlation_api  # noqa: F401
 from . import query  # noqa: F401
+from . import benchmark  # noqa: F401
